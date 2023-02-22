@@ -1,4 +1,4 @@
-all: compile link
+all: clean compile link
 
 compile:
 	g++ -g src/Main.cpp -c Main.o
