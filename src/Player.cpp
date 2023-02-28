@@ -1,4 +1,4 @@
-#include "headers/Player.hpp"
+#include "../include/Player.hpp"
 #include <iostream>
 
 Player::Player(sf::Texture *_t)

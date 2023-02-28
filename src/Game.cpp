@@ -1,4 +1,4 @@
-#include "headers/Game.hpp"
+#include "../include/Game.hpp"
 #include <stdarg.h>
 #include <iostream>
 #include <vector>
@@ -23,7 +23,7 @@ Game::~Game()
 void Game::initWindow()
 {
     //sets default size for window, creates title, and sets style to fullscreen
-    window.create(sf::VideoMode(640, 360), "Ninja Platofmrer",sf::Style::Fullscreen);
+    window.create(sf::VideoMode(3024, 1964), "Ninja Platfmrer");
 
     //syncs frames with refresh rate of monitor
     window.setVerticalSyncEnabled(true);
@@ -39,6 +39,7 @@ void Game::run()
     sf::Texture playerTexture;
 
     //takes texture from resources folder
+    
     if(!playerTexture.loadFromFile("resources/Adam.jpg"))
     {
         std::cout << "failed to load image.";
