@@ -1,26 +1,16 @@
 all: clean compile link
 
+files := src/Main.cpp src/Player.cpp src/Game.cpp src/Entity.cpp src/Block.cpp src/Button.cpp src/Menu.cpp
+
+libs := -lsfml-graphics -lsfml-window -lsfml-system
+
 compile:
-	g++ -g src/Main.cpp -c Main.o
-	g++ -g src/Player.cpp -c Player.o
-	g++ -g src/Game.cpp -c Game.o
-	g++ -g src/Entity.cpp -c Entity.o
-	g++ -g src/Enemy.cpp -c Game.o
-	g++ -g src/Block.cpp -c Block.o
-	g++ -g src/Button.cpp -c Button.o
-	g++ -g src/Menu.cpp -c Menu.o
-	mv Main.o obj
-	mv Player.o obj
-	mv Game.o obj
-	mv Entity.o obj
-	mv Enemy.o obj
-	mv Block.o obj
-	mv Button.o obj
-	mv Menu.o obj
+	g++ -g $(files) -c
+	mv *.o obj
 	
 link:
-	g++ obj/Main.o obj/Player.o obj/Game.o obj/Entity.o obj/Enemy.o obj/Block.o obj/Button.o obj/Menu.o -o Main.exe -lsfml-graphics -lsfml-window -lsfml-system
+	g++ obj/* -o Main.exe $(libs)
 
 clean:
-	rm obj/Main.o obj/Player.o obj/Game.o obj/Entity.o obj/Enemy.o obj/Block.o obj/Button.o obj/Menu.o Main.exe 
+	rm obj/* Main.exe 
 
