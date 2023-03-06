@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include <string>
-#include <functional>
+
+class Game;
 
 class Button
 {
@@ -10,7 +11,7 @@ class Button
         std::string id;
 
     public:
-        Button(std::string _id, std::string _text);//, std::function<void()> _action);
+        Button(std::string _id, std::string _text, sf::Font *_font);
         ~Button();
 
         //getter methods
@@ -18,9 +19,10 @@ class Button
         std::string getID();
 
         //setter methods
+        void setPosition(float x, float y);
 
         //other methods
-        void action();
-        void highlightButton();
+        void highlightButton(sf::RenderWindow *w);
+        void draw(sf::RenderWindow *w);
 
 };
