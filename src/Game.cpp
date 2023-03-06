@@ -32,7 +32,7 @@ void Game::loadTextures()
 
     sf::Texture playerTexture;
 
-    if(!playerTexture.loadFromFile("resources/Adam.jpg")) //takes texture from resources folder
+    if(!playerTexture.loadFromFile("resources/Images/Adam.jpg")) //takes texture from resources folder
     {
         std::cout << "failed to load image.";
     }
@@ -47,7 +47,7 @@ void Game::loadTextures()
 
     sf::Texture blockTexture;
 
-    if(!blockTexture.loadFromFile("resources/Adam.jpg")) //takes texture from resources folder
+    if(!blockTexture.loadFromFile("resources/Images/Adam.jpg")) //takes texture from resources folder
     {
         std::cout << "failed to load image.";
     }
@@ -60,7 +60,7 @@ void Game::loadTextures()
     textures["Block"] = blockTextures;
 
     //loads font
-    if(!font.loadFromFile("resources/Roboto-Black.ttf"))
+    if(!font.loadFromFile("resources/Fonts/Roboto-Black.ttf"))
     {
         std::cout << "failed to load font";
     }
