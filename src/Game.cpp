@@ -58,6 +58,12 @@ void Game::loadTextures()
     textures["Player"] = playerTextures;
     textures["Enemy"] = enemyTextures;
     textures["Block"] = blockTextures;
+
+    //loads font
+    if(!font.loadFromFile("resources/Roboto-Black.ttf"))
+    {
+        std::cout << "failed to load font";
+    }
 }
 
 //runs the game loop
@@ -68,6 +74,7 @@ void Game::run()
 
     //check if setup has been performed
     bool createdMenu;
+    bool createdPause;
     bool createdFirst;
 
     //lists of interactable objecs
@@ -98,18 +105,28 @@ void Game::run()
                 {
                     setMainMenu(&buttons);
                     createdMenu = true;
+                    createdPause = false;
                     createdFirst = false;
                 }
                 mainMenu(&buttons);
                 break;
+            case PAUSE_MENU:
+                if(!createdPause)
+                {
+                    setPauseMenu(&buttons);
+                    createdPause = true;
+                }
+                pauseMenu(&buttons, &blocks, &entities, &player);
+                break;
             case FIRST_LEVEL:
                 if(!createdFirst)
                 {
-                    setFirstLevel(&buttons, &blocks, &entities, &player);
+                    setFirstLevel(&blocks, &entities, &player);
                     createdMenu = false;
+                    createdPause = false;
                     createdFirst = true;
                 }
-                firstLevel(&buttons, &blocks, &entities, &player);
+                firstLevel(&blocks, &entities, &player);
                 break;
             case SECOND_LEVEL:
                 break;
@@ -125,39 +142,97 @@ void Game::setMainMenu(std::vector<Button> *buttons)
 
     buttons->clear();
 
-    Button startBtn("startBtn","Start");//, []() -> void {std::cout << "hello!";});
+    Button startBtn("startBtn","Start", &font);
 
-    sf::Vector2u windowSize = window.getSize();
-    startBtn.getRect()->setPosition(windowSize.x / 2,windowSize.y / 2);
+    Button optionsBtn("optionsBtn","Options", &font);
 
     buttons->push_back(startBtn);
+
+    buttons->push_back(optionsBtn);
 }
 
 void Game::mainMenu(std::vector<Button> *buttons)
 {
-    std::string collidedButtonID = mouseCollision(buttons);
+    window.clear();
 
-    if(collidedButtonID != "" && sf::Mouse::isButtonPressed(sf::Mouse::Right))
+    Menu menu("Ninja Platformer",buttons,&font);
+
+    menu.draw(&window);
+
+    std::string id = mouseCollision(buttons);
+
+    if(id != "" && sf::Mouse::isButtonPressed(sf::Mouse::Right))
     {
-        if(collidedButtonID == "startBtn")
+        if(id == "startBtn")
         {
             state = FIRST_LEVEL;
         }
     }
 
-    window.clear();
-    for(Button btn : *buttons)
-    {
-        window.draw(*btn.getRect());
-    }
     window.display();
 }
 
-void Game::setFirstLevel(std::vector<Button> *buttons, std::vector<Block> *blocks, std::vector<Entity> *entities, Player *player)
+void Game::setPauseMenu(std::vector<Button> *buttons)
+{
+    buttons->clear();
+
+    Button menuBtn("menuBtn","Menu", &font);
+
+    Button firstBtn("firstBtn","First Level", &font);
+
+    Button secondBtn("secondBtn","Second Level", &font);
+
+    Button thirdBtn("thirdBtn","Third Level", &font);
+
+    buttons->push_back(menuBtn);
+    buttons->push_back(firstBtn);
+    buttons->push_back(secondBtn);
+    buttons->push_back(thirdBtn);
+}
+
+void Game::pauseMenu(std::vector<Button> *buttons, std::vector<Block> *blocks, std::vector<Entity> *entities, Player *player)
+{
+    window.clear();
+
+    Menu pause("Paused",buttons,&font);
+
+    for(Block block : *blocks)
+    {
+        window.draw(*block.getSprite());
+    }
+    window.draw(*player->getSprite());
+
+    pause.draw(&window);
+
+    std::string id = mouseCollision(buttons);
+
+    if(id != "" && sf::Mouse::isButtonPressed(sf::Mouse::Right))
+    {
+        if(id == "menuBtn")
+        {
+            state = MAIN_MENU;
+        }
+        else if(id == "firstBtn")
+        {
+            state = FIRST_LEVEL;
+        }
+        else if(id == "secondBtn")
+        {
+            state = SECOND_LEVEL;
+        }
+        else if(id == "thirdBtn")
+        {
+            state = THIRD_LEVEL;
+        }
+    }
+
+    window.display();
+}
+
+void Game::setFirstLevel(std::vector<Block> *blocks, std::vector<Entity> *entities, Player *player)
 {
     std::cout << "first level";
 
-    buttons->clear();
     blocks->clear();
     entities->clear();
 
@@ -175,31 +250,18 @@ void Game::setFirstLevel(std::vector<Button> *buttons, std::vector<Block> *block
         b.getSprite()->setPosition(i,windowSize.y/2);
         blocks->push_back(b);
     }
-
-    Button startBtn("menuBtn","Menu");//, []() -> void {std::cout << "hello!";});
-
-    buttons->push_back(startBtn);
 }
 
-void Game::firstLevel(std::vector<Button> *buttons, std::vector<Block> *blocks, std::vector<Entity> *entities, Player *player)
+void Game::firstLevel(std::vector<Block> *blocks, std::vector<Entity> *entities, Player *player)
 {
-    std::string collidedButtonID = mouseCollision(buttons);
-
-    if(collidedButtonID != "" && sf::Mouse::isButtonPressed(sf::Mouse::Right))
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
     {
-        if(collidedButtonID == "menuBtn")
-        {
-            state = MAIN_MENU;
-        }
+        state = PAUSE_MENU;
     }
 
     movePlayer(blocks, entities, player);
 
     window.clear();
-    for(Button btn : *buttons)
-    {
-        window.draw(*btn.getRect());
-    }
     for(Block block : *blocks)
     {
         window.draw(*block.getSprite());
@@ -350,11 +412,13 @@ std::string Game::mouseCollision(std::vector<Button> *buttons)
 
     r.setPosition(mousePos);
 
-    for(Button b : *buttons)
+    for(int i = 0; i < buttons->size(); i++)
     {
-        if(r.getGlobalBounds().intersects(b.getRect()->getGlobalBounds()))
+        Button *b = &buttons->at(i);
+        if(r.getGlobalBounds().intersects(b->getRect()->getGlobalBounds()))
         {
-            return b.getID();
+            b->highlightButton(&window);
+            return b->getID();
         }
     }
 

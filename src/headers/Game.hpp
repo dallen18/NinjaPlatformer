@@ -7,7 +7,7 @@
 #include "Player.hpp"
 #include "Enemy.hpp"
 #include "Block.hpp"
-#include "Button.hpp"
+#include "Menu.hpp"
 
 class Game
 {
@@ -15,25 +15,40 @@ class Game
         sf::RenderWindow window;
         enum State {
             MAIN_MENU,
+            PAUSE_MENU,
             FIRST_LEVEL,
             SECOND_LEVEL,
             THIRD_LEVEL
         };
         enum State state;
         std::map<std::string, std::vector<sf::Texture>> textures;
+        sf::Font font;
 
     public:
         Game();
         ~Game();
-        void run();
-        void setMainMenu(std::vector<Button> *buttons);
-        void mainMenu(std::vector<Button> *buttons);
-        void setFirstLevel(std::vector<Button> *buttons, std::vector<Block> *blocks, std::vector<Entity> *entities, Player *player);
-        void firstLevel(std::vector<Button> *buttons, std::vector<Block> *blocks, std::vector<Entity> *entities, Player *player);
+
+        //game set-up functions
         void initWindow();
         void loadTextures();
+
+        //game loop
+        void run();
+
+        //main menu set-up and logic functions
+        void setMainMenu(std::vector<Button> *buttons);
+        void mainMenu(std::vector<Button> *buttons);
+
+        //first level
+        void setFirstLevel(std::vector<Block> *blocks, std::vector<Entity> *entities, Player *player);
+        void firstLevel(std::vector<Block> *blocks, std::vector<Entity> *entities, Player *player);
+
+        //pause menu
+        void setPauseMenu(std::vector<Button> *buttons);
+        void pauseMenu(std::vector<Button> *buttons, std::vector<Block> *blocks, std::vector<Entity> *entities, Player *player);
+
+        //collision and movement
         void movePlayer(std::vector<Block> *blocks, std::vector<Entity> *entities, Player *player);
         void playerCollision(std::vector<Entity> *entities, std::vector<Block> *blocks, Player *player, sf::FloatRect *n);
         std::string mouseCollision(std::vector<Button> *buttons);
-        void draw(int n, ...);
 };
