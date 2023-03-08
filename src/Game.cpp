@@ -11,17 +11,20 @@ Game::Game()
 
 Game::~Game()
 {
-
+    delete player;
 }
 
 //initializes window
 void Game::initWindow()
 {
     //sets default size for window, creates title, and sets style to fullscreen
-    window.create(sf::VideoMode(640, 360), "Ninja Platofmrer",sf::Style::Fullscreen);
+    window.create(sf::VideoMode(1920,1080), "Ninja Platofmrer",sf::Style::Fullscreen);
 
     //syncs frames with refresh rate of monitor
     window.setVerticalSyncEnabled(true);
+    
+    //key presses cannot repeat so holding down keys isn't possible
+    window.setKeyRepeatEnabled(false);
 }
 
 //loads textures
@@ -71,20 +74,12 @@ void Game::run()
 {
     //sets initial state of game at main menu
     state = MAIN_MENU;
+    savedState = state;
 
-    //check if setup has been performed
-    bool createdMenu;
-    bool createdPause;
-    bool createdFirst;
+    //array contains booleans and checks whether the setup function for a state has been performed
+    bool createdState[sizeof(State)];
 
-    //lists of interactable objecs
-    std::vector<Entity> entities;
-    
-    std::vector<Block> blocks;
-
-    std::vector<Button> buttons;
-
-    Player player(&textures["Player"], 10.0f, 10.0f, 1.0f); //instantiates player. passes player textures, max x-axis speed, max y-axis speed, and acceleration rate
+    player = new Player(&textures["Player"], 10.0f, 10.0f, 1.0f);  //instantiates player. passes player textures, max x-axis speed, max y-axis speed, and acceleration rate
 
     while (window.isOpen())
     {
@@ -96,85 +91,80 @@ void Game::run()
             {
                 window.close();
             }
+
+            handleInput(&event);
         }
 
         switch(state)
         {
             case MAIN_MENU:
-                if(!createdMenu)
+                if(!createdState[MAIN_MENU])
                 {
-                    setMainMenu(&buttons);
-                    createdMenu = true;
-                    createdPause = false;
-                    createdFirst = false;
+                    setMainMenu(); //set up
+                    createdState[savedState] = false;
+                    createdState[MAIN_MENU] = true;
                 }
-                mainMenu(&buttons);
+                mainMenu(); //logic
                 break;
             case PAUSE_MENU:
-                if(!createdPause)
+                if(!createdState[PAUSE_MENU])
                 {
-                    setPauseMenu(&buttons);
-                    createdPause = true;
+                    setPauseMenu(); //set up
+                    createdState[PAUSE_MENU] = true; //not inserting false to previous state in case we want to go back
                 }
-                pauseMenu(&buttons, &blocks, &entities, &player);
+                pauseMenu(); //logic
                 break;
             case FIRST_LEVEL:
-                if(!createdFirst)
+                if(!createdState[FIRST_LEVEL])
                 {
-                    setFirstLevel(&blocks, &entities, &player);
-                    createdMenu = false;
-                    createdPause = false;
-                    createdFirst = true;
+                    setFirstLevel();
+                    createdState[savedState] = false;
+                    createdState[FIRST_LEVEL] = true;
                 }
-                firstLevel(&blocks, &entities, &player);
-                break;
-            case SECOND_LEVEL:
-                break;
-            case THIRD_LEVEL:
+                firstLevel();
                 break;
         }
     }
 }
 
-void Game::setMainMenu(std::vector<Button> *buttons)
+void Game::setMainMenu()
 {
-    std::cout << "main menu";
-
-    buttons->clear();
+    buttons.clear();
 
     Button startBtn("startBtn","Start", &font);
 
     Button optionsBtn("optionsBtn","Options", &font);
 
-    buttons->push_back(startBtn);
+    buttons.push_back(startBtn);
 
-    buttons->push_back(optionsBtn);
+    buttons.push_back(optionsBtn);
 }
 
-void Game::mainMenu(std::vector<Button> *buttons)
+void Game::mainMenu()
 {
     window.clear();
 
-    Menu menu("Ninja Platformer",buttons,&font);
+    Menu menu("Ninja Platformer",&buttons,&font);
 
     menu.draw(&window);
 
-    std::string id = mouseCollision(buttons);
+    std::string id = mouseCollision();
 
-    if(id != "" && sf::Mouse::isButtonPressed(sf::Mouse::Right))
+    if(id != "" && clicked)
     {
         if(id == "startBtn")
         {
             state = FIRST_LEVEL;
         }
+        clicked = false;
     }
 
     window.display();
 }
 
-void Game::setPauseMenu(std::vector<Button> *buttons)
+void Game::setPauseMenu()
 {
-    buttons->clear();
+    buttons.clear();
 
     Button menuBtn("menuBtn","Menu", &font);
 
@@ -184,29 +174,30 @@ void Game::setPauseMenu(std::vector<Button> *buttons)
 
     Button thirdBtn("thirdBtn","Third Level", &font);
 
-    buttons->push_back(menuBtn);
-    buttons->push_back(firstBtn);
-    buttons->push_back(secondBtn);
-    buttons->push_back(thirdBtn);
+    buttons.push_back(menuBtn);
+    buttons.push_back(firstBtn);
+    buttons.push_back(secondBtn);
+    buttons.push_back(thirdBtn);
 }
 
-void Game::pauseMenu(std::vector<Button> *buttons, std::vector<Block> *blocks, std::vector<Entity> *entities, Player *player)
+void Game::pauseMenu()
 {
     window.clear();
+    
+    Menu pause("Paused",&buttons,&font);
 
-    Menu pause("Paused",buttons,&font);
-
-    for(Block block : *blocks)
+    for(Block block : blocks)
     {
         window.draw(*block.getSprite());
     }
+
     window.draw(*player->getSprite());
 
     pause.draw(&window);
 
-    std::string id = mouseCollision(buttons);
+    std::string id = mouseCollision();
 
-    if(id != "" && sf::Mouse::isButtonPressed(sf::Mouse::Right))
+    if(id != "" && clicked)
     {
         if(id == "menuBtn")
         {
@@ -216,25 +207,15 @@ void Game::pauseMenu(std::vector<Button> *buttons, std::vector<Block> *blocks, s
         {
             state = FIRST_LEVEL;
         }
-        else if(id == "secondBtn")
-        {
-            state = SECOND_LEVEL;
-        }
-        else if(id == "thirdBtn")
-        {
-            state = THIRD_LEVEL;
-        }
+        clicked = false;
     }
 
     window.display();
 }
 
-void Game::setFirstLevel(std::vector<Block> *blocks, std::vector<Entity> *entities, Player *player)
+void Game::setFirstLevel()
 {
-    std::cout << "first level";
-
-    blocks->clear();
-    entities->clear();
+    blocks.clear();
 
     //gets window size and set position of player sprite to middle of window
     sf::Vector2f windowSize = (sf::Vector2f)window.getSize();
@@ -248,33 +229,27 @@ void Game::setFirstLevel(std::vector<Block> *blocks, std::vector<Entity> *entiti
     {
         Block b(&textures["Block"]);
         b.getSprite()->setPosition(i,windowSize.y/2);
-        blocks->push_back(b);
+        blocks.push_back(b);
     }
 }
 
-void Game::firstLevel(std::vector<Block> *blocks, std::vector<Entity> *entities, Player *player)
+void Game::firstLevel()
 {
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
-    {
-        state = PAUSE_MENU;
-    }
-
-    movePlayer(blocks, entities, player);
+    movePlayer();
 
     window.clear();
-    for(Block block : *blocks)
+
+    for(Block block : blocks)
     {
         window.draw(*block.getSprite());
     }
-    // for(Entity entity : entities)
-    // {
-    //     window.draw(*entity.getSprite());
-    // }
+
     window.draw(*player->getSprite());
+    
     window.display();
 }
 
-void Game::movePlayer(std::vector<Block> *blocks, std::vector<Entity> *entities, Player *player)
+void Game::movePlayer()
 {
     //floatRects contain coordinates and sizes of current state of player and next state
     sf::FloatRect playerBounds = player->getSprite()->getGlobalBounds();
@@ -312,25 +287,23 @@ void Game::movePlayer(std::vector<Block> *blocks, std::vector<Entity> *entities,
         }
     }
 
-    bool spacePressed = false;
-
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) //up
+    if(player->getJumping()) //up
     {
         if(yVel == 0 && player->getContactBottom())
         {
             yVel = -yMax;
-            spacePressed = true;
             player->setContactBottom(false);
         }
     }
-
-    if(!spacePressed) //down
+    else //down
     {
         if(yVel < yMax)
         {
             yVel += accel;
         }
     }
+
+    player->setJumping(false);
 
     player->setXVel(xVel);
     player->setYVel(yVel);
@@ -340,24 +313,24 @@ void Game::movePlayer(std::vector<Block> *blocks, std::vector<Entity> *entities,
     nextBounds.top += yVel;
 
     //check collision
-    playerCollision(entities, blocks, player, &nextBounds);
+    playerCollision(&nextBounds);
 
     //moves sprite
     player->getSprite()->move(player->getXVel(),player->getYVel());
 }
 
-void Game::playerCollision(std::vector<Entity> *entities, std::vector<Block> *blocks, Player *player, sf::FloatRect *n)
+void Game::playerCollision(sf::FloatRect *_nextBounds)
 {
     //collision with screen
 
     //collision with entities
 
     //collision with blocks
-    for(Block b : *blocks) //goes through list of blocks
+    for(Block b : blocks) //goes through list of blocks
     {
         sf::FloatRect blockBounds = b.getSprite()->getGlobalBounds();
         sf::FloatRect playerBounds = player->getSprite()->getGlobalBounds();
-        sf::FloatRect nextBounds = *n;
+        sf::FloatRect nextBounds = *_nextBounds;
 
         //collision with bottom of player
         if(playerBounds.top + playerBounds.height <= blockBounds.top
@@ -403,7 +376,7 @@ void Game::playerCollision(std::vector<Entity> *entities, std::vector<Block> *bl
     }
 }
 
-std::string Game::mouseCollision(std::vector<Button> *buttons)
+std::string Game::mouseCollision()
 {
     //collision with buttons
     sf::Vector2f mousePos = (sf::Vector2f)sf::Mouse::getPosition();
@@ -412,9 +385,9 @@ std::string Game::mouseCollision(std::vector<Button> *buttons)
 
     r.setPosition(mousePos);
 
-    for(int i = 0; i < buttons->size(); i++)
+    for(int i = 0; i < buttons.size(); i++)
     {
-        Button *b = &buttons->at(i);
+        Button *b = &buttons.at(i);
         if(r.getGlobalBounds().intersects(b->getRect()->getGlobalBounds()))
         {
             b->highlightButton(&window);
@@ -424,3 +397,50 @@ std::string Game::mouseCollision(std::vector<Button> *buttons)
 
     return "";
 }
+
+void Game::handleInput(sf::Event *event)
+{
+    if(event->type == sf::Event::KeyPressed)
+    {   
+        if(state != MAIN_MENU && state != PAUSE_MENU)
+        {
+            if(event->key.code == sf::Keyboard::Escape)
+            {
+                savedState = state;
+                state = PAUSE_MENU;
+            }
+
+            if(event->key.code == sf::Keyboard::Space)
+            {
+                player->setJumping(true);
+            }
+        }
+        else if(state == PAUSE_MENU)
+        {
+            if(event->key.code == sf::Keyboard::Escape)
+            {
+                state = savedState;
+            }
+        }
+    }
+    else if(event->type == sf::Event::MouseButtonPressed)
+    {
+        if(state == MAIN_MENU || state == PAUSE_MENU)
+        {
+            if(event->mouseButton.button == sf::Mouse::Left)
+            {
+                savedState = state;
+                clicked = true;
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+

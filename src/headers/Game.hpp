@@ -13,6 +13,8 @@ class Game
 {
     private:
         sf::RenderWindow window;
+
+        //state of game
         enum State {
             MAIN_MENU,
             PAUSE_MENU,
@@ -20,9 +22,24 @@ class Game
             SECOND_LEVEL,
             THIRD_LEVEL
         };
+
         enum State state;
+        enum State savedState;
+
+        //assets
         std::map<std::string, std::vector<sf::Texture>> textures;
         sf::Font font;
+
+        //lists of interactable objecs
+        std::vector<Entity> entities;
+        
+        std::vector<Block> blocks;
+
+        std::vector<Button> buttons;
+
+        Player *player;
+
+        bool clicked = false;
 
     public:
         Game();
@@ -36,19 +53,20 @@ class Game
         void run();
 
         //main menu set-up and logic functions
-        void setMainMenu(std::vector<Button> *buttons);
-        void mainMenu(std::vector<Button> *buttons);
+        void setMainMenu();
+        void mainMenu();
 
         //first level
-        void setFirstLevel(std::vector<Block> *blocks, std::vector<Entity> *entities, Player *player);
-        void firstLevel(std::vector<Block> *blocks, std::vector<Entity> *entities, Player *player);
+        void setFirstLevel();
+        void firstLevel();
 
         //pause menu
-        void setPauseMenu(std::vector<Button> *buttons);
-        void pauseMenu(std::vector<Button> *buttons, std::vector<Block> *blocks, std::vector<Entity> *entities, Player *player);
+        void setPauseMenu();
+        void pauseMenu();
 
         //collision and movement
-        void movePlayer(std::vector<Block> *blocks, std::vector<Entity> *entities, Player *player);
-        void playerCollision(std::vector<Entity> *entities, std::vector<Block> *blocks, Player *player, sf::FloatRect *n);
-        std::string mouseCollision(std::vector<Button> *buttons);
+        void movePlayer();
+        void playerCollision(sf::FloatRect *_nextBounds);
+        std::string mouseCollision();
+        void handleInput(sf::Event *event);
 };
