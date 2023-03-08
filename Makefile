@@ -1,6 +1,6 @@
 all: clean compile link
 
-files := src/Main.cpp src/Player.cpp src/Game.cpp src/Entity.cpp src/Block.cpp src/Button.cpp src/Menu.cpp
+files := src/Main.cpp src/Player.cpp src/Game.cpp src/Entity.cpp src/Block.cpp src/Enemy.cpp src/Button.cpp src/Menu.cpp
 
 libs := -lsfml-graphics -lsfml-window -lsfml-system
 
