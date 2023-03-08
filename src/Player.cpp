@@ -24,6 +24,16 @@ bool Player::getContactBottom()
     return contactBottom;
 }
 
+bool Player::getJumping()
+{
+    return jumping;
+}
+
+void Player::setJumping(bool b)
+{
+    jumping = b;
+}
+
 void Player::setContactBottom(bool b)
 {
     contactBottom = b;

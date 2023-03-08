@@ -3,33 +3,13 @@
     #include "Entity.hpp"
 #endif
 
-// class Player
-// {
-//     private:
-//         sf::Texture t;
-//         sf::Sprite s;
-//         float xVel;
-//         float yVel;
-//         bool bottom;
-//         sf::FloatRect playerBounds;
-//         sf::FloatRect nextBounds;
-//         float xMax;
-//         float yMax;
-//         float accel;
-
-//     public:
-//         Player(sf::Texture *_t);
-//         ~Player();
-//         sf::Sprite *getSprite();
-//         void setTexture(sf::Texture *_t);
-//         void move(std::vector<sf::RectangleShape> *blockList);
-//         void collision(std::vector<sf::RectangleShape> *blockList);
-// };
-
 class Player : public Entity
 {
     private:
         bool contactBottom;
+        
+        //input
+        bool jumping = false;
 
     public:
         //constructor
@@ -37,9 +17,11 @@ class Player : public Entity
 
         //getter methods
         bool getContactBottom();
+        bool getJumping();
 
         //setter methods
         void setContactBottom(bool b);
+        void setJumping(bool b); //sets spacePressed to true if space bar is pressed
 
         //other methods
         void animation();
