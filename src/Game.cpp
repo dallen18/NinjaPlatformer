@@ -42,8 +42,26 @@ void Game::loadTextures()
 
     playerTextures.push_back(playerTexture);
 
+    sf::Texture heartTexture;
+
+    if(!heartTexture.loadFromFile("resources/Images/heart-icon.png")) //takes texture from resources folder
+    {
+        std::cout << "failed to load image.";
+    }
+
+    playerTextures.push_back(heartTexture);
+
     //load enemy textures
     std::vector<sf::Texture> enemyTextures;
+
+    sf::Texture enemyTexture;
+
+    if(!enemyTexture.loadFromFile("resources/Images/Adam.jpg")) //takes texture from resources folder
+    {
+        std::cout << "failed to load image.";
+    }
+
+    enemyTextures.push_back(enemyTexture);
 
     //load block textures
     std::vector<sf::Texture> blockTextures;
@@ -76,10 +94,8 @@ void Game::run()
     state = MAIN_MENU;
     savedState = state;
 
-    //array contains booleans and checks whether the setup function for a state has been performed
-    bool createdState[sizeof(State)];
-
-    player = new Player(&textures["Player"], 10.0f, 10.0f, 1.0f);  //instantiates player. passes player textures, max x-axis speed, max y-axis speed, and acceleration rate
+    //allocates memory for player since there is no default constructor that allows global variable otherwise
+    player = new Player(&textures["Player"], 10.0f, 12.0f, 1.0f);  //instantiates player. passes player textures, max x-axis speed, max y-axis speed, and acceleration rate
 
     while (window.isOpen())
     {
@@ -154,6 +170,7 @@ void Game::mainMenu()
     {
         if(id == "startBtn")
         {
+            createdState[state] = false;
             state = FIRST_LEVEL;
         }
         clicked = false;
@@ -191,7 +208,14 @@ void Game::pauseMenu()
         window.draw(*block.getSprite());
     }
 
+    for(Entity *entity: entities)
+    {
+        window.draw(*entity->getSprite());
+    }
+
     window.draw(*player->getSprite());
+
+    drawUI();
 
     pause.draw(&window);
 
@@ -201,6 +225,8 @@ void Game::pauseMenu()
     {
         if(id == "menuBtn")
         {
+            createdState[savedState] = false;
+            createdState[state] = false;
             state = MAIN_MENU;
         }
         else if(id == "firstBtn")
@@ -217,6 +243,10 @@ void Game::setFirstLevel()
 {
     blocks.clear();
 
+    entities.clear();
+
+    player->setHealth(5);
+
     //gets window size and set position of player sprite to middle of window
     sf::Vector2f windowSize = (sf::Vector2f)window.getSize();
     sf::Sprite *playerSprite = player->getSprite();
@@ -231,11 +261,36 @@ void Game::setFirstLevel()
         b.getSprite()->setPosition(i,windowSize.y/2);
         blocks.push_back(b);
     }
+
+    Block r(&textures["Block"]);
+    r.getSprite()->setPosition(900,476);
+    blocks.push_back(r);
+
+    Block w(&textures["Block"]);
+    w.getSprite()->setPosition(1220,476);
+    blocks.push_back(w);
+
+    /*
+        entities is a vector of derived objects so it has contain pointers otherwise object splicing occurs. 
+        allocates memory for enemy otherwise data is only copied and the data that the pointer points to is
+        overwritten by the program with other variables.
+    */
+    Enemy *enemy = new Enemy(&textures["Player"],10.0f,0.0f,1.0f);
+    enemy->getSprite()->setPosition(1000,476);
+    entities.push_back(enemy);
 }
 
 void Game::firstLevel()
 {
     movePlayer();
+
+    for(Entity *entity : entities)
+    {
+        if(entity->getClass() == "Enemy")
+        {
+            moveEnemy((Enemy *)entity);
+        }
+    }
 
     window.clear();
 
@@ -244,8 +299,15 @@ void Game::firstLevel()
         window.draw(*block.getSprite());
     }
 
+    for(Entity *entity: entities)
+    {
+        window.draw(*entity->getSprite());
+    }
+
     window.draw(*player->getSprite());
-    
+
+    drawUI();
+
     window.display();
 }
 
@@ -324,6 +386,14 @@ void Game::playerCollision(sf::FloatRect *_nextBounds)
     //collision with screen
 
     //collision with entities
+    for(int i = 0; i < entities.size(); i++)
+    {
+        if(player->getSprite()->getGlobalBounds().intersects(entities.at(i)->getSprite()->getGlobalBounds()))
+        {
+            player->decreaseHealth();
+            entities.erase(entities.begin()+i);
+        }
+    }
 
     //collision with blocks
     for(Block b : blocks) //goes through list of blocks
@@ -419,6 +489,7 @@ void Game::handleInput(sf::Event *event)
         {
             if(event->key.code == sf::Keyboard::Escape)
             {
+                createdState[state] = false;
                 state = savedState;
             }
         }
@@ -429,16 +500,56 @@ void Game::handleInput(sf::Event *event)
         {
             if(event->mouseButton.button == sf::Mouse::Left)
             {
-                savedState = state;
                 clicked = true;
             }
         }
     }
 }
 
+void Game::drawUI()
+{
+    //draws hearts
+    for(int i = 0; i < player->getHealth(); i++)
+    {
+        sf::Vector2u textureSize = textures["Player"].at(1).getSize();
+        sf::RectangleShape heart(sf::Vector2f(64,64));
+        heart.setTexture(&textures["Player"].at(1));
+        heart.setPosition((i + 1) * 64, 100);
+        window.draw(heart);
+    }
+}
 
+void Game::moveEnemy(Enemy *enemy)
+{
+    // if(enemy->getXVel() < enemy->getXMax())
+    // {
+    //     enemy->setXVel(enemy->getXVel() + enemy->getAccel());
+    // }
 
+    // enemyCollision(enemy);
 
+    // enemy->getSprite()->move(enemy->getXVel(),0);
+}
+
+void Game::enemyCollision(Enemy *enemy)
+{
+    for(Block block : blocks)
+    {
+        // if(enemy->getSprite()->getGlobalBounds().intersects(block.getSprite()->getGlobalBounds()))
+        // {
+        //     if(enemy->getAccel() > 0)
+        //     {
+        //         enemy->getSprite()->setPosition(block.getSprite()->getPosition().x - enemy->getSprite()->getGlobalBounds().width, enemy->getSprite()->getGlobalBounds().top);
+        //     }
+        //     else
+        //     {
+        //         enemy->getSprite()->setPosition(block.getSprite()->getPosition().x + block.getSprite()->getGlobalBounds().width, enemy->getSprite()->getGlobalBounds().top);
+        //     }
+        //     enemy->setAccel(-enemy->getAccel());
+        //     enemy->setXVel(0);
+        // }
+    }
+}
 
 
 
