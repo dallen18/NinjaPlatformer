@@ -1,4 +1,5 @@
 #include "headers/Player.hpp"
+#include <iostream>
 
 /*
 Constructor of Player class. Takes the following Parameters:
@@ -17,6 +18,9 @@ Player::Player(std::vector<sf::Texture> *textures, float xMax, float yMax, float
     setXMax(xMax);
     setYMax(yMax);
     setAccel(accel);
+
+    contactBottom = false;
+    jumping = false;
 }
 
 bool Player::getContactBottom()
@@ -29,6 +33,11 @@ bool Player::getJumping()
     return jumping;
 }
 
+int Player::getHealth()
+{
+    return health;
+}
+
 void Player::setJumping(bool b)
 {
     jumping = b;
@@ -37,6 +46,19 @@ void Player::setJumping(bool b)
 void Player::setContactBottom(bool b)
 {
     contactBottom = b;
+}
+
+void Player::setHealth(int h)
+{
+    health = h;
+}
+
+void Player::decreaseHealth()
+{
+    if(health != 0)
+    {
+        health -= 1;
+    }
 }
 
 /*
