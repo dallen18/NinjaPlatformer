@@ -26,12 +26,15 @@ class Game
         enum State state;
         enum State savedState;
 
+        //array contains booleans and checks whether the setup function for a state has been performed
+        bool createdState[sizeof(State)];
+
         //assets
         std::map<std::string, std::vector<sf::Texture>> textures;
         sf::Font font;
 
         //lists of interactable objecs
-        std::vector<Entity> entities;
+        std::vector<Entity*> entities;
         
         std::vector<Block> blocks;
 
@@ -69,4 +72,10 @@ class Game
         void playerCollision(sf::FloatRect *_nextBounds);
         std::string mouseCollision();
         void handleInput(sf::Event *event);
+
+        void moveEnemy(Enemy *enemy);
+
+        void enemyCollision(Enemy *enemy);
+
+        void drawUI();
 };
