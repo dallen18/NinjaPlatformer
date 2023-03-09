@@ -1,4 +1,5 @@
 #include "headers/Enemy.hpp"
+#include <iostream>
 
 /*
 Constructor of Player class. Takes the following Parameters:
@@ -17,6 +18,16 @@ Enemy::Enemy(std::vector<sf::Texture> *textures, float xMax, float yMax, float a
     setXMax(xMax);
     setYMax(yMax);
     setAccel(accel);
+}
+
+Enemy::~Enemy()
+{
+    delete this;
+}
+
+std::string Enemy::getClass()
+{
+    return "Enemy";
 }
 
 /*
