@@ -30,6 +30,8 @@ class Entity
         void setAccel(float a);
         void setTextures(std::vector<sf::Texture> *t);
 
+        virtual std::string getClass();
+
         //methods that need to be implemented for every class that is derived from Entity
-        virtual void animation() = 0; //handles animation
+        virtual void animation(); //handles animation
 };
