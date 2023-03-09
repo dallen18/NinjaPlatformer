@@ -30,6 +30,11 @@ float Entity::getAccel()
     return accel;
 }
 
+std::string Entity::getClass()
+{
+    return "Entity";
+}
+
 void Entity::setXVel(float x)
 {
     xVel = x;
@@ -58,4 +63,9 @@ void Entity::setAccel(float a)
 void Entity::setTextures(std::vector<sf::Texture> *t)
 {
     textures = t;
+}
+
+void Entity::animation()
+{
+    
 }
