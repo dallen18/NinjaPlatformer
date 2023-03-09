@@ -9,19 +9,25 @@ class Player : public Entity
         bool contactBottom;
         
         //input
-        bool jumping = false;
+        bool jumping; 
+
+        // int health;
 
     public:
+        int health;
         //constructor
         Player(std::vector<sf::Texture> *textures, float xMax, float yMax, float accel);
 
         //getter methods
         bool getContactBottom();
         bool getJumping();
+        int getHealth();
 
         //setter methods
         void setContactBottom(bool b);
         void setJumping(bool b); //sets spacePressed to true if space bar is pressed
+        void setHealth(int h);
+        void decreaseHealth();
 
         //other methods
         void animation();
