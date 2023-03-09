@@ -9,5 +9,9 @@ class Enemy : public Entity
 
     public:
         Enemy(std::vector<sf::Texture> *textures, float xMax, float yMax, float accel);
+        ~Enemy();
+
+        std::string getClass();
+
         void animation();
 };
