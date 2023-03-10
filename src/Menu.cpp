@@ -11,23 +11,6 @@ Menu::Menu(std::string _title, std::vector<Button> *_buttons, sf::Font *_font)
     title.setFillColor(sf::Color::Blue);
 
     buttons = _buttons;
-
-    rectHeight += title.getGlobalBounds().height;
-
-    rectHeight += 35;
-
-    for(Button btn : *buttons)
-    {
-        rectHeight += btn.getRect()->getGlobalBounds().height;
-    }
-
-    float y = 540 - rectHeight / 2 + 15;
-
-    for(int i = 0; i < buttons->size(); i++)
-    {
-        buttons->at(i).setPosition(960 -  buttons->at(i).getRect()->getGlobalBounds().width / 2, y);
-        y +=  buttons->at(i).getRect()->getGlobalBounds().height;
-    }
 }
 
 Menu::~Menu()
@@ -37,25 +20,26 @@ Menu::~Menu()
 
 void Menu::draw(sf::RenderWindow *w)
 {
-    sf::Vector2u windowSize= w->getSize();
+    sf::Vector2f windowSize = w->getView().getSize();
+
+    sf::Vector2f windowPosition = w->getView().getCenter() - windowSize / 2.0f;
 
     sf::RectangleShape menuRect(sf::Vector2f(windowSize.x,windowSize.y));
 
     menuRect.setFillColor(sf::Color(0,0,0,200));
 
-    title.setPosition(windowSize.x / 2 - title.getGlobalBounds().width / 2, windowSize.y / 2 - rectHeight / 2 - title.getCharacterSize());
+    menuRect.setPosition(windowPosition);
 
-    sf::RectangleShape bar(sf::Vector2f(400,5.0f));
+    title.setPosition(windowPosition.x + windowSize.x / 2 - title.getGlobalBounds().width / 2, windowPosition.y + windowSize.y / 2 - 150);
 
-    bar.setFillColor(sf::Color::White);
-
-    bar.setPosition(windowSize.x / 2 - bar.getSize().x / 2, windowSize.y / 2 - rectHeight / 2 + 15);
+    for(int i = 0; i < buttons->size(); i++)
+    {
+        buttons->at(i).setPosition(windowPosition.x + windowSize.x / 2 -  buttons->at(i).getRect()->getGlobalBounds().width / 2, windowPosition.y + windowSize.y / 2 + 50 * (i - 1));
+    }
 
     w->draw(menuRect);
 
     w->draw(title);
-
-    w->draw(bar);
 
     for(Button btn : *buttons)
     {
