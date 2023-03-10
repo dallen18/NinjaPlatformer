@@ -147,13 +147,17 @@ void Game::setMainMenu()
 {
     buttons.clear();
 
+    sf::View view(sf::FloatRect(0.0f,0.0f,1920.0f,1080.0f));
+
+    window.setView(view);
+
     Button startBtn("startBtn","Start", &font);
 
-    Button optionsBtn("optionsBtn","Options", &font);
+    Button exitBtn("exitBtn","Exit", &font);
 
     buttons.push_back(startBtn);
 
-    buttons.push_back(optionsBtn);
+    buttons.push_back(exitBtn);
 }
 
 void Game::mainMenu()
@@ -172,6 +176,10 @@ void Game::mainMenu()
         {
             createdState[state] = false;
             state = FIRST_LEVEL;
+        }
+        if(id == "exitBtn")
+        {
+            window.close();
         }
         clicked = false;
     }
@@ -247,6 +255,10 @@ void Game::setFirstLevel()
 
     player->setHealth(5);
 
+    sf::View view(sf::FloatRect(0.0f,0.0f,1920.0f,1080.0f));
+
+    window.setView(view);
+
     //gets window size and set position of player sprite to middle of window
     sf::Vector2f windowSize = (sf::Vector2f)window.getSize();
     sf::Sprite *playerSprite = player->getSprite();
@@ -283,6 +295,11 @@ void Game::setFirstLevel()
 void Game::firstLevel()
 {
     movePlayer();
+
+    sf::View view = window.getView();
+    view.setCenter(player->getSprite()->getPosition());
+
+    window.setView(view);
 
     for(Entity *entity : entities)
     {
@@ -449,7 +466,7 @@ void Game::playerCollision(sf::FloatRect *_nextBounds)
 std::string Game::mouseCollision()
 {
     //collision with buttons
-    sf::Vector2f mousePos = (sf::Vector2f)sf::Mouse::getPosition();
+    sf::Vector2f mousePos = window.getView().getCenter() - window.getView().getSize() / 2.0f + (sf::Vector2f)sf::Mouse::getPosition();
 
     sf::RectangleShape r(sf::Vector2f(1,1));
 
@@ -514,7 +531,8 @@ void Game::drawUI()
         sf::Vector2u textureSize = textures["Player"].at(1).getSize();
         sf::RectangleShape heart(sf::Vector2f(64,64));
         heart.setTexture(&textures["Player"].at(1));
-        heart.setPosition((i + 1) * 64, 100);
+        sf::View view = window.getView();
+        heart.setPosition(view.getCenter().x - view.getSize().x / 2 + (i + 1) * 64, view.getCenter().y - view.getSize().y / 2 + 100);
         window.draw(heart);
     }
 }

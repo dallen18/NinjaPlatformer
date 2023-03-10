@@ -18,6 +18,7 @@ class Game
         enum State {
             MAIN_MENU,
             PAUSE_MENU,
+            LOST_MENU,
             FIRST_LEVEL,
             SECOND_LEVEL,
             THIRD_LEVEL
