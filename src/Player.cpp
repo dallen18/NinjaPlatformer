@@ -23,6 +23,62 @@ Player::Player(std::vector<sf::Texture> *textures, float xMax, float yMax, float
     jumping = false;
 }
 
+void Player::move()
+{
+    float xVel = getXVel();
+    float yVel = getYVel();
+    float xMax = getXMax();
+    float yMax = getYMax();
+    float accel = getAccel();
+
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)) //right
+    {
+        if(xVel < xMax)
+        {
+            xVel += accel;
+        }
+    }
+    else if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)) //left
+    {
+        if(xVel > -xMax)
+        {
+            xVel -= accel;
+        }
+    }
+    else
+    {
+        if(xVel > 0)
+        {
+            xVel -= accel;
+        }
+        else if(xVel < 0)
+        {
+            xVel += accel;
+        }
+    }
+
+    if(getJumping()) //up
+    {
+        if(yVel == 0 && getContactBottom())
+        {
+            yVel = -yMax;
+            setContactBottom(false);
+        }
+    }
+    else //down
+    {
+        if(yVel < yMax)
+        {
+            yVel += accel;
+        }
+    }
+
+    setJumping(false);
+
+    setXVel(xVel);
+    setYVel(yVel);
+}
+
 bool Player::getContactBottom()
 {
     return contactBottom;

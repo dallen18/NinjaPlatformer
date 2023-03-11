@@ -29,6 +29,8 @@ class Player : public Entity
         void setHealth(int h);
         void decreaseHealth();
 
+        void move();
+
         //other methods
         void animation();
 };

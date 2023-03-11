@@ -13,5 +13,7 @@ class Enemy : public Entity
 
         std::string getClass();
 
+        void move();
+
         void animation();
 };
