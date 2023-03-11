@@ -69,3 +69,8 @@ void Entity::animation()
 {
     
 }
+
+void Entity::move()
+{
+    
+}

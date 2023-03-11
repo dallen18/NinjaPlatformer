@@ -32,6 +32,8 @@ class Entity
 
         virtual std::string getClass();
 
+        virtual void move();
+
         //methods that need to be implemented for every class that is derived from Entity
         virtual void animation(); //handles animation
 };
