@@ -37,6 +37,7 @@ class Game
         //lists of interactable objecs
         std::vector<Entity*> entities;
         
+        // std::array<Block,1024> blocks;
         std::vector<Block> blocks;
 
         std::vector<Button> buttons;
@@ -69,12 +70,9 @@ class Game
         void pauseMenu();
 
         //collision and movement
-        void movePlayer();
-        void playerCollision(sf::FloatRect *_nextBounds);
+        void playerCollision();
         std::string mouseCollision();
         void handleInput(sf::Event *event);
-
-        void moveEnemy(Enemy *enemy);
 
         void enemyCollision(Enemy *enemy);
 

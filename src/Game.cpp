@@ -294,7 +294,11 @@ void Game::setFirstLevel()
 
 void Game::firstLevel()
 {
-    movePlayer();
+    player->move();
+
+    playerCollision();
+
+    player->getSprite()->move(sf::Vector2f(player->getXVel(),player->getYVel()));
 
     sf::View view = window.getView();
     view.setCenter(player->getSprite()->getPosition());
@@ -305,7 +309,7 @@ void Game::firstLevel()
     {
         if(entity->getClass() == "Enemy")
         {
-            moveEnemy((Enemy *)entity);
+            ((Enemy *)entity)->move();
         }
     }
 
@@ -328,77 +332,7 @@ void Game::firstLevel()
     window.display();
 }
 
-void Game::movePlayer()
-{
-    //floatRects contain coordinates and sizes of current state of player and next state
-    sf::FloatRect playerBounds = player->getSprite()->getGlobalBounds();
-    sf::FloatRect nextBounds = playerBounds;
-
-    float xVel = player->getXVel();
-    float yVel = player->getYVel();
-    float xMax = player->getXMax();
-    float yMax = player->getYMax();
-    float accel = player->getAccel();
-
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)) //right
-    {
-        if(xVel < xMax)
-        {
-            xVel += accel;
-        }
-    }
-    else if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)) //left
-    {
-        if(xVel > -xMax)
-        {
-            xVel -= accel;
-        }
-    }
-    else
-    {
-        if(xVel > 0)
-        {
-            xVel -= accel;
-        }
-        else if(xVel < 0)
-        {
-            xVel += accel;
-        }
-    }
-
-    if(player->getJumping()) //up
-    {
-        if(yVel == 0 && player->getContactBottom())
-        {
-            yVel = -yMax;
-            player->setContactBottom(false);
-        }
-    }
-    else //down
-    {
-        if(yVel < yMax)
-        {
-            yVel += accel;
-        }
-    }
-
-    player->setJumping(false);
-
-    player->setXVel(xVel);
-    player->setYVel(yVel);
-
-    //modifies next state
-    nextBounds.left += xVel;
-    nextBounds.top += yVel;
-
-    //check collision
-    playerCollision(&nextBounds);
-
-    //moves sprite
-    player->getSprite()->move(player->getXVel(),player->getYVel());
-}
-
-void Game::playerCollision(sf::FloatRect *_nextBounds)
+void Game::playerCollision()
 {
     //collision with screen
 
@@ -417,7 +351,9 @@ void Game::playerCollision(sf::FloatRect *_nextBounds)
     {
         sf::FloatRect blockBounds = b.getSprite()->getGlobalBounds();
         sf::FloatRect playerBounds = player->getSprite()->getGlobalBounds();
-        sf::FloatRect nextBounds = *_nextBounds;
+        sf::FloatRect nextBounds = player->getSprite()->getGlobalBounds();
+        nextBounds.left += player->getXVel();
+        nextBounds.top += player->getYVel();
 
         //collision with bottom of player
         if(playerBounds.top + playerBounds.height <= blockBounds.top
@@ -535,18 +471,6 @@ void Game::drawUI()
         heart.setPosition(view.getCenter().x - view.getSize().x / 2 + (i + 1) * 64, view.getCenter().y - view.getSize().y / 2 + 100);
         window.draw(heart);
     }
-}
-
-void Game::moveEnemy(Enemy *enemy)
-{
-    // if(enemy->getXVel() < enemy->getXMax())
-    // {
-    //     enemy->setXVel(enemy->getXVel() + enemy->getAccel());
-    // }
-
-    // enemyCollision(enemy);
-
-    // enemy->getSprite()->move(enemy->getXVel(),0);
 }
 
 void Game::enemyCollision(Enemy *enemy)
