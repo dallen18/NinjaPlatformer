@@ -1,4 +1,5 @@
 #include "headers/Enemy.hpp"
+#include <cmath>
 #include <iostream>
 
 /*
@@ -34,11 +35,20 @@ std::string Enemy::getClass()
 
 void Enemy::move()
 {
-    if(getYVel() != getYMax())
+    if(std::abs(getXVel()) < getXMax())
     {
-        setYVel(getYVel()+getAccel()); 
+        setXVel(getXVel() + getAccel());
     }
-    std::cout << getYVel();
+
+    if(getYVel() < getYMax())
+    {
+        int accel = getAccel();
+        if(accel < 0)
+        {
+            accel *= -1;
+        }
+        setYVel(getYVel() + accel); 
+    }
 }
 
 /*
