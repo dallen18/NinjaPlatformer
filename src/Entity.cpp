@@ -30,6 +30,16 @@ float Entity::getAccel()
     return accel;
 }
 
+int Entity::getXSize()
+{
+    return xSize;
+}
+
+int Entity::getYSize()
+{
+    return ySize;
+}
+
 std::string Entity::getClass()
 {
     return "Entity";
@@ -60,6 +70,16 @@ void Entity::setAccel(float a)
     accel = a;
 }
 
+void Entity::setXSize(int s)
+{
+    xSize = s;
+}
+
+void Entity::setYSize(int s)
+{
+    ySize = s;
+}
+
 void Entity::setTextures(std::vector<sf::Texture> *t)
 {
     textures = t;
@@ -72,5 +92,5 @@ void Entity::animation()
 
 void Entity::move()
 {
-    
+   
 }

@@ -9,7 +9,7 @@ Constructor of Player class. Takes the following Parameters:
     -float accel: sets acceleration rate for player
 
 */
-Enemy::Enemy(std::vector<sf::Texture> *textures, float xMax, float yMax, float accel)
+Enemy::Enemy(std::vector<sf::Texture> *textures, float xMax, float yMax, float accel, int xSize, int ySize)
 {   
     setTextures(textures);
     getSprite()->setTexture(textures->front()); //sets initial texture of sprite as the first texture in list
@@ -18,6 +18,8 @@ Enemy::Enemy(std::vector<sf::Texture> *textures, float xMax, float yMax, float a
     setXMax(xMax);
     setYMax(yMax);
     setAccel(accel);
+    setXSize(xSize);
+    setYSize(ySize);
 }
 
 Enemy::~Enemy()
@@ -32,7 +34,11 @@ std::string Enemy::getClass()
 
 void Enemy::move()
 {
-    
+    if(getYVel() != getYMax())
+    {
+        setYVel(getYVel()+getAccel()); 
+    }
+    std::cout << getYVel();
 }
 
 /*

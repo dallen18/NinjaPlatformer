@@ -16,7 +16,7 @@ class Player : public Entity
     public:
         int health;
         //constructor
-        Player(std::vector<sf::Texture> *textures, float xMax, float yMax, float accel);
+        Player(std::vector<sf::Texture> *textures, float xMax, float yMax, float accel, int xSize, int ySize);
 
         //getter methods
         bool getContactBottom();

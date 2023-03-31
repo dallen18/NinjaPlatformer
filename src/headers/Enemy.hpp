@@ -8,7 +8,7 @@ class Enemy : public Entity
     private:
 
     public:
-        Enemy(std::vector<sf::Texture> *textures, float xMax, float yMax, float accel);
+        Enemy(std::vector<sf::Texture> *textures, float xMax, float yMax, float accel, int xSize, int ySize);
         ~Enemy();
 
         std::string getClass();

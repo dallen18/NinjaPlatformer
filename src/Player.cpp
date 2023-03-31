@@ -9,7 +9,7 @@ Constructor of Player class. Takes the following Parameters:
     -float accel: sets acceleration rate for player
 
 */
-Player::Player(std::vector<sf::Texture> *textures, float xMax, float yMax, float accel)
+Player::Player(std::vector<sf::Texture> *textures, float xMax, float yMax, float accel, int xSize, int ySize)
 {   
     setTextures(textures);
     getSprite()->setTexture(textures->front()); //sets initial texture of sprite as the first texture in list
@@ -18,6 +18,8 @@ Player::Player(std::vector<sf::Texture> *textures, float xMax, float yMax, float
     setXMax(xMax);
     setYMax(yMax);
     setAccel(accel);
+    setXSize(xSize);
+    setYSize(ySize);
 
     contactBottom = false;
     jumping = false;
