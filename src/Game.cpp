@@ -288,7 +288,7 @@ void Game::setFirstLevel()
         allocates memory for enemy otherwise data is only copied and the data that the pointer points to is
         overwritten by the program with other variables.
     */
-    Enemy *enemy = new Enemy(&textures["Player"],10.0f,0.0f,1.0f,64,64);
+    Enemy *enemy = new Enemy(&textures["Player"],10.0f,12.0f,1.0f,64,64);
     enemy->getSprite()->setPosition(1000,400);
     entities.push_back(enemy);
 }
@@ -302,8 +302,8 @@ void Game::firstLevel()
 
     a.left = player->getSprite()->getPosition().x;
     a.top = player->getSprite()->getPosition().y;
-    a.width = 64;
-    a.height = 64;
+    a.width = player->getXSize();
+    a.height = player->getYSize();
     
     bool checkX;
     bool checkY;
@@ -363,20 +363,93 @@ void Game::firstLevel()
             break;
         }
     }
-
-    for(Entity *entity : entities)
+    
+    player->getSprite()->move(player->getXVel(),player->getYVel());
+    
+    for(int i = 0; i <  entities.size(); i++)
     {
+        Entity *entity = entities.at(i);
+        b.left = entity->getSprite()->getPosition().x;
+        b.top = entity->getSprite()->getPosition().y;
         if(entity->getClass() == "Enemy")
         {
             bool c = checkCollision(a,b);
             if(c)
             {
-                //entities.erase(entity);
+                entities.erase(entities.begin() + i);
             }
         }
     }
+    
+    for(Entity *entity: entities)
+    {
+        entity->move();
 
-    player->getSprite()->move(player->getXVel(),player->getYVel());
+        a.left = entity->getSprite()->getPosition().x;
+        a.top = entity->getSprite()->getPosition().y;
+        a.width = entity->getXSize();
+        a.height = entity->getYSize();
+        checkX = false;
+        checkY = false;
+
+        for(Block bl : blocks)
+        {
+            b.left = bl.getSprite()->getPosition().x;
+            b.top = bl.getSprite()->getPosition().y;
+            b.width = 64;
+            b.height = 64;
+
+            a.left += entity->getXVel();
+            checkX = checkCollision(a, b);
+            if(checkX)
+            {
+                a.left -= entity->getXVel();
+                if(a.left < b.left)
+                {
+                    a.left =  b.left - a.width;
+                }
+                else
+                {
+                    a.left = b.left + b.width;
+                }
+                entity->setAccel(entity->getAccel() * -1);
+                entity->getSprite()->setPosition(a.left,a.top);
+                entity->setXVel(0);
+            }
+            else
+            {
+                a.left -= entity->getXVel();
+            }
+
+            a.top += entity->getYVel();
+            checkY = checkCollision(a, b);
+            if(checkY)
+            {
+                a.top -= entity->getYVel();
+                if(a.top < b.top)
+                {
+                    a.top = b.top - a.height;
+                }
+                else
+                {
+                    a.top = b.top + b.height;
+                }
+                entity->getSprite()->setPosition(a.left,a.top);
+                entity->setYVel(0);
+            }
+            else
+            {
+                a.top -= entity->getYVel();
+            }
+
+            if(checkX && checkY)
+            {
+                break;
+            }
+        }
+
+        entity->getSprite()->move(entity->getXVel(),entity->getYVel());
+    }
 
     sf::View view = window.getView();
     view.setCenter(player->getSprite()->getPosition());
