@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Graphics/Rect.hpp>
 #include <iostream>
 #include <stdarg.h>
 #include <vector>
@@ -73,8 +74,6 @@ class Game
         void playerCollision();
         std::string mouseCollision();
         void handleInput(sf::Event *event);
-
-        void enemyCollision(Enemy *enemy);
-
+        bool checkCollision(sf::Rect<float> a, sf::Rect<float> b);
         void drawUI();
 };

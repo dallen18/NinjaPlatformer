@@ -1,4 +1,5 @@
 #include "headers/Game.hpp"
+#include <SFML/Graphics/Rect.hpp>
 
 Game::Game()
 {
@@ -95,7 +96,7 @@ void Game::run()
     savedState = state;
 
     //allocates memory for player since there is no default constructor that allows global variable otherwise
-    player = new Player(&textures["Player"], 10.0f, 12.0f, 1.0f);  //instantiates player. passes player textures, max x-axis speed, max y-axis speed, and acceleration rate
+    player = new Player(&textures["Player"], 10.0f, 12.0f, 1.0f, 64, 64);  //instantiates player. passes player textures, max x-axis speed, max y-axis speed, and acceleration rate
 
     while (window.isOpen())
     {
@@ -262,7 +263,7 @@ void Game::setFirstLevel()
     //gets window size and set position of player sprite to middle of window
     sf::Vector2f windowSize = (sf::Vector2f)window.getSize();
     sf::Sprite *playerSprite = player->getSprite();
-    playerSprite->setPosition(windowSize.x/2 - playerSprite->getGlobalBounds().width/2, windowSize.y/2 - playerSprite->getGlobalBounds().height * 2);
+    playerSprite->setPosition(windowSize.x/2 - playerSprite->getGlobalBounds().width/2, windowSize.y/2 - playerSprite->getGlobalBounds().height * 2 - 200);
 
     int playerSize = playerSprite->getTexture()->getSize().x;
 
@@ -287,8 +288,8 @@ void Game::setFirstLevel()
         allocates memory for enemy otherwise data is only copied and the data that the pointer points to is
         overwritten by the program with other variables.
     */
-    Enemy *enemy = new Enemy(&textures["Player"],10.0f,0.0f,1.0f);
-    enemy->getSprite()->setPosition(1000,476);
+    Enemy *enemy = new Enemy(&textures["Player"],10.0f,0.0f,1.0f,64,64);
+    enemy->getSprite()->setPosition(1000,400);
     entities.push_back(enemy);
 }
 
@@ -296,22 +297,91 @@ void Game::firstLevel()
 {
     player->move();
 
-    playerCollision();
+    //playerCollision();
+    sf::Rect<float> a, b;
 
-    player->getSprite()->move(sf::Vector2f(player->getXVel(),player->getYVel()));
+    a.left = player->getSprite()->getPosition().x;
+    a.top = player->getSprite()->getPosition().y;
+    a.width = 64;
+    a.height = 64;
+    
+    bool checkX;
+    bool checkY;
 
-    sf::View view = window.getView();
-    view.setCenter(player->getSprite()->getPosition());
+    for(Block bl : blocks)
+    {
+        b.left = bl.getSprite()->getPosition().x;
+        b.top = bl.getSprite()->getPosition().y;
+        b.width = 64;
+        b.height = 64;
 
-    window.setView(view);
+        a.left += player->getXVel();
+        checkX = checkCollision(a, b);
+        if(checkX)
+        {
+            a.left -= player->getXVel();
+            if(a.left < b.left)
+            {
+                a.left =  b.left - a.width;
+            }
+            else
+            {
+                a.left = b.left + b.width;
+            }
+            player->getSprite()->setPosition(a.left,a.top);
+            player->setXVel(0);
+        }
+        else
+        {
+            a.left -= player->getXVel();
+        }
+
+        a.top += player->getYVel();
+        checkY = checkCollision(a, b);
+        if(checkY)
+        {
+            a.top -= player->getYVel();
+            if(a.top < b.top)
+            {
+                a.top = b.top - a.height;
+            }
+            else
+            {
+                a.top = b.top + b.height;
+            }
+            player->getSprite()->setPosition(a.left,a.top);
+            player->setYVel(0);
+            player->setContactBottom(true);
+        }
+        else
+        {
+            a.top -= player->getYVel();
+        }
+
+        if(checkX && checkY)
+        {
+            break;
+        }
+    }
 
     for(Entity *entity : entities)
     {
         if(entity->getClass() == "Enemy")
         {
-            ((Enemy *)entity)->move();
+            bool c = checkCollision(a,b);
+            if(c)
+            {
+                //entities.erase(entity);
+            }
         }
     }
+
+    player->getSprite()->move(player->getXVel(),player->getYVel());
+
+    sf::View view = window.getView();
+    view.setCenter(player->getSprite()->getPosition());
+
+    window.setView(view);
 
     window.clear();
 
@@ -332,71 +402,44 @@ void Game::firstLevel()
     window.display();
 }
 
-void Game::playerCollision()
+bool Game::checkCollision(sf::Rect<float> a, sf::Rect<float> b)
 {
-    //collision with screen
+    float leftA, leftB;
+    float rightA, rightB;
+    float topA, topB;
+    float bottomA, bottomB;
 
-    //collision with entities
-    for(int i = 0; i < entities.size(); i++)
+    leftA = a.left;
+    rightA = a.left + a.width;
+    topA = a.top;
+    bottomA = a.top + a.height;
+    
+    leftB = b.left;
+    rightB = b.left + b.width;
+    topB = b.top;
+    bottomB = b.top + b.height;
+
+    if(bottomA <= topB)
     {
-        if(player->getSprite()->getGlobalBounds().intersects(entities.at(i)->getSprite()->getGlobalBounds()))
-        {
-            player->decreaseHealth();
-            entities.erase(entities.begin()+i);
-        }
+        return false;
     }
 
-    //collision with blocks
-    for(Block b : blocks) //goes through list of blocks
+    if(topA >= bottomB)
     {
-        sf::FloatRect blockBounds = b.getSprite()->getGlobalBounds();
-        sf::FloatRect playerBounds = player->getSprite()->getGlobalBounds();
-        sf::FloatRect nextBounds = player->getSprite()->getGlobalBounds();
-        nextBounds.left += player->getXVel();
-        nextBounds.top += player->getYVel();
-
-        //collision with bottom of player
-        if(playerBounds.top + playerBounds.height <= blockBounds.top
-        && nextBounds.top + nextBounds.height > blockBounds.top
-        && ((nextBounds.left > blockBounds.left && nextBounds.left < blockBounds.left + blockBounds.height) 
-            ||(nextBounds.left + nextBounds.height > blockBounds.left && nextBounds.left + nextBounds.height < blockBounds.left + blockBounds.height)
-            ||(nextBounds.left <= blockBounds.left && nextBounds.left + nextBounds.height >= blockBounds.left + blockBounds.height)))
-        {
-            player->setYVel(0.0f); //resets y-axis velocity
-            player->getSprite()->setPosition(player->getSprite()->getPosition().x, blockBounds.top - playerBounds.height); //sets position to edge of block
-            player->setContactBottom(true); //this boolean is used to check if the player is on the ground and is able to jump. go to move()
-        }
-        //collision with top of player
-        else if(playerBounds.top >= blockBounds.top + blockBounds.height
-        && nextBounds.top < blockBounds.top + blockBounds.height
-        && ((nextBounds.left > blockBounds.left && nextBounds.left < blockBounds.left + blockBounds.height) 
-            ||(nextBounds.left + nextBounds.height > blockBounds.left && nextBounds.left + nextBounds.height < blockBounds.left + blockBounds.height)
-            ||(nextBounds.left <= blockBounds.left && nextBounds.left + nextBounds.height >= blockBounds.left + blockBounds.height)))
-        {
-            player->setYVel(0.0f);
-            player->getSprite()->setPosition(player->getSprite()->getPosition().x, blockBounds.top + blockBounds.height);
-        }
-        //collision with right of player
-        else if(playerBounds.left + playerBounds.width <= blockBounds.left 
-        && nextBounds.left + nextBounds.width > blockBounds.left
-        && ((nextBounds.top > blockBounds.top && nextBounds.top < blockBounds.top + blockBounds.height) 
-            ||(nextBounds.top + nextBounds.height > blockBounds.top && nextBounds.top + nextBounds.height < blockBounds.top + blockBounds.height)
-            ||(nextBounds.top <= blockBounds.top && nextBounds.top + nextBounds.height >= blockBounds.top + blockBounds.height)))
-        {
-            player->setXVel(0.0f); //resets x-axis velocity
-            player->getSprite()->setPosition(blockBounds.left - playerBounds.width, player->getSprite()->getPosition().y);
-        }
-        //collision with left of player
-        else if(playerBounds.left >= blockBounds.left + blockBounds.width
-        && nextBounds.left < blockBounds.left + blockBounds.width
-        && ((nextBounds.top > blockBounds.top && nextBounds.top < blockBounds.top + blockBounds.height) 
-            ||(nextBounds.top + nextBounds.height > blockBounds.top && nextBounds.top + nextBounds.height < blockBounds.top + blockBounds.height)
-            ||(nextBounds.top <= blockBounds.top && nextBounds.top + nextBounds.height >= blockBounds.top + blockBounds.height)))
-        {
-            player->setXVel(0.0f);
-            player->getSprite()->setPosition(blockBounds.left + blockBounds.width, player->getSprite()->getPosition().y);
-        }
+        return false;
     }
+
+    if(rightA <= leftB)
+    {
+        return false;
+    }
+
+    if(leftA >= rightB)
+    {
+        return false;
+    }
+
+    return true;
 }
 
 std::string Game::mouseCollision()
@@ -470,26 +513,6 @@ void Game::drawUI()
         sf::View view = window.getView();
         heart.setPosition(view.getCenter().x - view.getSize().x / 2 + (i + 1) * 64, view.getCenter().y - view.getSize().y / 2 + 100);
         window.draw(heart);
-    }
-}
-
-void Game::enemyCollision(Enemy *enemy)
-{
-    for(Block block : blocks)
-    {
-        // if(enemy->getSprite()->getGlobalBounds().intersects(block.getSprite()->getGlobalBounds()))
-        // {
-        //     if(enemy->getAccel() > 0)
-        //     {
-        //         enemy->getSprite()->setPosition(block.getSprite()->getPosition().x - enemy->getSprite()->getGlobalBounds().width, enemy->getSprite()->getGlobalBounds().top);
-        //     }
-        //     else
-        //     {
-        //         enemy->getSprite()->setPosition(block.getSprite()->getPosition().x + block.getSprite()->getGlobalBounds().width, enemy->getSprite()->getGlobalBounds().top);
-        //     }
-        //     enemy->setAccel(-enemy->getAccel());
-        //     enemy->setXVel(0);
-        // }
     }
 }
 
