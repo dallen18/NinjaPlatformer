@@ -295,6 +295,24 @@ void Game::setFirstLevel()
 
 void Game::firstLevel()
 {
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)) //right
+    {
+        player->setRight(true);
+    }
+    else
+    {
+        player->setRight(false);
+    }
+    
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)) //left
+    {
+        player->setLeft(true);
+    }
+    else
+    {
+        player->setLeft(false);
+    }
+
     player->move();
 
     //playerCollision();
@@ -551,7 +569,10 @@ void Game::handleInput(sf::Event *event)
 
             if(event->key.code == sf::Keyboard::Space)
             {
-                player->setJumping(true);
+                if(player->getContactBottom())
+                {
+                    player->setJumping(true);
+                }
             }
         }
         else if(state == PAUSE_MENU)
