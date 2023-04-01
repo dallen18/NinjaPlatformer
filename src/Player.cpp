@@ -22,7 +22,9 @@ Player::Player(std::vector<sf::Texture> *textures, float xMax, float yMax, float
     setYSize(ySize);
 
     contactBottom = false;
-    jumping = false;
+    jump = false;
+    right = false;
+    left = false;
 }
 
 void Player::move()
@@ -33,14 +35,14 @@ void Player::move()
     float yMax = getYMax();
     float accel = getAccel();
 
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)) //right
+    if(right) //right
     {
         if(xVel < xMax)
         {
             xVel += accel;
         }
     }
-    else if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)) //left
+    else if(left) //left
     {
         if(xVel > -xMax)
         {
@@ -61,11 +63,14 @@ void Player::move()
 
     if(getJumping()) //up
     {
-        if(yVel == 0 && getContactBottom())
-        {
-            yVel = -yMax;
-            setContactBottom(false);
-        }
+        // if(yVel == 0 && getContactBottom())
+        // {
+        //     yVel = -yMax;
+        //     setContactBottom(false);
+        // }
+        yVel = -yMax;
+        setContactBottom(false);
+        setJumping(false);
     }
     else //down
     {
@@ -74,8 +79,6 @@ void Player::move()
             yVel += accel;
         }
     }
-
-    setJumping(false);
 
     setXVel(xVel);
     setYVel(yVel);
@@ -88,7 +91,17 @@ bool Player::getContactBottom()
 
 bool Player::getJumping()
 {
-    return jumping;
+    return jump;
+}
+
+bool Player::getRight()
+{
+    return right;
+}
+
+bool Player::getLeft()
+{
+    return left;
 }
 
 int Player::getHealth()
@@ -98,7 +111,17 @@ int Player::getHealth()
 
 void Player::setJumping(bool b)
 {
-    jumping = b;
+    jump = b;
+}
+
+void Player::setRight(bool b)
+{
+    right = b;
+}
+
+void Player::setLeft(bool b)
+{
+    left = b;
 }
 
 void Player::setContactBottom(bool b)

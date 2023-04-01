@@ -6,26 +6,30 @@
 class Player : public Entity
 {
     private:
-        bool contactBottom;
+        bool contactBottom; 
         
-        //input
-        bool jumping; 
+        int health;
 
-        // int health;
+        bool jump;
+        bool right;
+        bool left;
 
     public:
-        int health;
         //constructor
         Player(std::vector<sf::Texture> *textures, float xMax, float yMax, float accel, int xSize, int ySize);
 
         //getter methods
         bool getContactBottom();
         bool getJumping();
+        bool getRight();
+        bool getLeft();
         int getHealth();
 
         //setter methods
         void setContactBottom(bool b);
         void setJumping(bool b); //sets spacePressed to true if space bar is pressed
+        void setRight(bool b);
+        void setLeft(bool b);
         void setHealth(int h);
         void decreaseHealth();
 
