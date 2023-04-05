@@ -1,5 +1,9 @@
 #include "headers/Game.hpp"
+#include <SFML/Graphics/Glyph.hpp>
 #include <SFML/Graphics/Rect.hpp>
+#include <SFML/Graphics/RectangleShape.hpp>
+#include <chrono>
+#include <thread>
 
 Game::Game()
 {
@@ -22,7 +26,7 @@ void Game::initWindow()
     window.create(sf::VideoMode(1920,1080), "Ninja Platofmrer",sf::Style::Fullscreen);
 
     //syncs frames with refresh rate of monitor
-    window.setVerticalSyncEnabled(true);
+    //window.setVerticalSyncEnabled(true);
     
     //key presses cannot repeat so holding down keys isn't possible
     window.setKeyRepeatEnabled(false);
@@ -87,7 +91,7 @@ void Game::loadTextures()
         std::cout << "failed to load font";
     }
 }
-
+using namespace std::chrono_literals;
 //runs the game loop
 void Game::run()
 {
@@ -98,8 +102,16 @@ void Game::run()
     //allocates memory for player since there is no default constructor that allows global variable otherwise
     player = new Player(&textures["Player"], 10.0f, 12.0f, 1.0f, 64, 64);  //instantiates player. passes player textures, max x-axis speed, max y-axis speed, and acceleration rate
 
+    //auto start = std::chrono::high_resolution_clock::now();
+    //std::this_thread::sleep_for(1s);
+    //auto end = std::chrono::high_resolution_clock::now();
+    //std::chrono::duration<float> duration = end - start;
+    
+    //auto start = std::chrono::high_resolution_clock::now();
+    int countedFrames = 0;
     while (window.isOpen())
     {
+        auto start = std::chrono::high_resolution_clock::now();
         sf::Event event;
 
         while (window.pollEvent(event))
@@ -141,6 +153,17 @@ void Game::run()
                 firstLevel();
                 break;
         }
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<float> duration = end - start;
+        float avg = countedFrames / duration.count() * 1000;
+        auto sleep = SCREEN_TICKS_PER_FRAME - duration.count();
+        //std::cout << sleep;
+        if(duration.count() * 1000 < SCREEN_TICKS_PER_FRAME)
+        {
+            std::this_thread::sleep_for(std::chrono::microseconds((int)(sleep*1000)));
+        }
+        //std::cout << 1/(sleep/1000) << "FPS" <<"\n";
+        countedFrames += 1;
     }
 }
 
@@ -291,10 +314,16 @@ void Game::setFirstLevel()
     Enemy *enemy = new Enemy(&textures["Player"],10.0f,12.0f,1.0f,64,64);
     enemy->getSprite()->setPosition(1000,400);
     entities.push_back(enemy);
+
+    NPC *npc = new NPC(&textures["Player"],10.0f,12.0f,1.0f,64,64,"Hello, my name is Adam! I love eating raw potatoes while watching Korean dramas. My favorite instrument is the ocarina I stole from my four year old cousin.");
+    npc->getSprite()->setPosition(500,476);
+    entities.push_back(npc);
 }
 
 void Game::firstLevel()
 {
+    window.clear();
+    
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)) //right
     {
         player->setRight(true);
@@ -389,12 +418,55 @@ void Game::firstLevel()
         Entity *entity = entities.at(i);
         b.left = entity->getSprite()->getPosition().x;
         b.top = entity->getSprite()->getPosition().y;
-        if(entity->getClass() == "Enemy")
+        bool c = checkCollision(a, b);
+        if(c)
         {
-            bool c = checkCollision(a,b);
-            if(c)
+            if(entity->getClass() == "Enemy")
             {
+                player->decreaseHealth();
+                if(player->getHealth() == 0)
+                {
+                    state = MAIN_MENU;
+                }
                 entities.erase(entities.begin() + i);
+            }
+            else if(entity->getClass() == "NPC")
+            {
+                std::string str = ((NPC*)entity)->getString();
+                std::string part;
+                sf::Text t;
+                t.setFont(font);
+                t.setCharacterSize(20);
+                t.setFillColor(sf::Color::Blue);
+                t.setPosition(entity->getSprite()->getPosition().x,entity->getSprite()->getPosition().y - str.size());
+                //t.setString("hello");
+                //window.draw(t);
+            
+                sf::RectangleShape background(sf::Vector2f(220,str.size() + 20));
+
+                background.setFillColor(sf::Color::White);
+
+                background.setPosition(t.getPosition().x - 10, t.getPosition().y - 10);
+
+                window.draw(background);
+                
+                for(int i = 0; i < str.size(); i++)
+                {
+                    if(str[i] != '\n')
+                    {
+                        std::cout << str[i];
+                        part.push_back(str[i]);
+                    }
+                    else
+                    {
+                        t.setString(part);
+                        window.draw(t);
+                        part.clear();
+                        t.move(0,20);
+                    } 
+                }
+                t.setString(part);
+                window.draw(t);
             }
         }
     }
@@ -473,8 +545,6 @@ void Game::firstLevel()
     view.setCenter(player->getSprite()->getPosition());
 
     window.setView(view);
-
-    window.clear();
 
     for(Block block : blocks)
     {
