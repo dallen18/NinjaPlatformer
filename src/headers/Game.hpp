@@ -1,14 +1,21 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Rect.hpp>
+#include <SFML/System/Clock.hpp>
 #include <iostream>
 #include <stdarg.h>
 #include <vector>
 #include <map>
 #include <string>
+#include <chrono>
+#include <thread>
 #include "Player.hpp"
 #include "Enemy.hpp"
 #include "Block.hpp"
 #include "Menu.hpp"
+#include "NPC.hpp"
+
+const int SCREEN_FPS = 60;
+const int SCREEN_TICKS_PER_FRAME = 1000 / SCREEN_FPS;
 
 class Game
 {
