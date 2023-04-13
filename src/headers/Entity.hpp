@@ -6,7 +6,7 @@ class Entity
 {
     private:
         sf::Sprite sprite;
-        std::vector<sf::Texture> *textures;
+        sf::Texture *texture;
         float xVel;
         float yVel;
         float xMax;
@@ -34,7 +34,7 @@ class Entity
         void setAccel(float a);
         void setXSize(int s);
         void setYSize(int s);
-        void setTextures(std::vector<sf::Texture> *t);
+        void setTexture(sf::Texture *t);
 
         virtual std::string getClass();
 

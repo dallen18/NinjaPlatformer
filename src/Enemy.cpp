@@ -10,10 +10,10 @@ Constructor of Player class. Takes the following Parameters:
     -float accel: sets acceleration rate for player
 
 */
-Enemy::Enemy(std::vector<sf::Texture> *textures, float xMax, float yMax, float accel, int xSize, int ySize)
+Enemy::Enemy(sf::Texture *texture, float xMax, float yMax, float accel, int xSize, int ySize)
 {   
-    setTextures(textures);
-    getSprite()->setTexture(textures->front()); //sets initial texture of sprite as the first texture in list
+    setTexture(texture);
+    getSprite()->setTexture(*texture); //sets initial texture of sprite as the first texture in list
     setXVel(0.0f);
     setYVel(0.0f);
     setXMax(xMax);
@@ -21,6 +21,7 @@ Enemy::Enemy(std::vector<sf::Texture> *textures, float xMax, float yMax, float a
     setAccel(accel);
     setXSize(xSize);
     setYSize(ySize);
+    getSprite()->setTextureRect(sf::IntRect(0,0,xSize,ySize));
 }
 
 Enemy::~Enemy()

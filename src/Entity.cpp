@@ -80,9 +80,9 @@ void Entity::setYSize(int s)
     ySize = s;
 }
 
-void Entity::setTextures(std::vector<sf::Texture> *t)
+void Entity::setTexture(sf::Texture *t)
 {
-    textures = t;
+    texture = t;
 }
 
 void Entity::animation()
