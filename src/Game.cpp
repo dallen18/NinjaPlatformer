@@ -1,9 +1,10 @@
 #include "headers/Game.hpp"
-#include <SFML/Graphics/Glyph.hpp>
+#include "headers/Hud.hpp"
+#include "headers/tinyxml2.h"
 #include <SFML/Graphics/Rect.hpp>
-#include <SFML/Graphics/RectangleShape.hpp>
-#include <chrono>
-#include <thread>
+#include <SFML/System/Vector2.hpp>
+#include <fstream>
+#include <string>
 
 Game::Game()
 {
@@ -26,7 +27,7 @@ void Game::initWindow()
     window.create(sf::VideoMode(1920,1080), "Ninja Platofmrer",sf::Style::Fullscreen);
 
     //syncs frames with refresh rate of monitor
-    //window.setVerticalSyncEnabled(true);
+    window.setVerticalSyncEnabled(true);
     
     //key presses cannot repeat so holding down keys isn't possible
     window.setKeyRepeatEnabled(false);
@@ -36,16 +37,12 @@ void Game::initWindow()
 void Game::loadTextures()
 {
     //load player textures
-    std::vector<sf::Texture> playerTextures;
-
     sf::Texture playerTexture;
 
     if(!playerTexture.loadFromFile("resources/Images/Adam.jpg")) //takes texture from resources folder
     {
         std::cout << "failed to load image.";
     }
-
-    playerTextures.push_back(playerTexture);
 
     sf::Texture heartTexture;
 
@@ -54,11 +51,7 @@ void Game::loadTextures()
         std::cout << "failed to load image.";
     }
 
-    playerTextures.push_back(heartTexture);
-
     //load enemy textures
-    std::vector<sf::Texture> enemyTextures;
-
     sf::Texture enemyTexture;
 
     if(!enemyTexture.loadFromFile("resources/Images/Adam.jpg")) //takes texture from resources folder
@@ -66,24 +59,19 @@ void Game::loadTextures()
         std::cout << "failed to load image.";
     }
 
-    enemyTextures.push_back(enemyTexture);
-
     //load block textures
-    std::vector<sf::Texture> blockTextures;
-
     sf::Texture blockTexture;
 
-    if(!blockTexture.loadFromFile("resources/Images/Adam.jpg")) //takes texture from resources folder
+    if(!blockTexture.loadFromFile("resources/Images/cavesofgallet.png")) //takes texture from resources folder
     {
         std::cout << "failed to load image.";
     }
     
-    blockTextures.push_back(blockTexture);
-
     //inserts lists into map
-    textures["Player"] = playerTextures;
-    textures["Enemy"] = enemyTextures;
-    textures["Block"] = blockTextures;
+    textures["Player"] = playerTexture;
+    textures["Heart"] = heartTexture;
+    textures["Enemy"] = enemyTexture;
+    textures["Block"] = blockTexture;
 
     //loads font
     if(!font.loadFromFile("resources/Fonts/Roboto-Black.ttf"))
@@ -91,7 +79,7 @@ void Game::loadTextures()
         std::cout << "failed to load font";
     }
 }
-using namespace std::chrono_literals;
+
 //runs the game loop
 void Game::run()
 {
@@ -99,19 +87,8 @@ void Game::run()
     state = MAIN_MENU;
     savedState = state;
 
-    //allocates memory for player since there is no default constructor that allows global variable otherwise
-    player = new Player(&textures["Player"], 10.0f, 12.0f, 1.0f, 64, 64);  //instantiates player. passes player textures, max x-axis speed, max y-axis speed, and acceleration rate
-
-    //auto start = std::chrono::high_resolution_clock::now();
-    //std::this_thread::sleep_for(1s);
-    //auto end = std::chrono::high_resolution_clock::now();
-    //std::chrono::duration<float> duration = end - start;
-    
-    //auto start = std::chrono::high_resolution_clock::now();
-    int countedFrames = 0;
     while (window.isOpen())
     {
-        auto start = std::chrono::high_resolution_clock::now();
         sf::Event event;
 
         while (window.pollEvent(event))
@@ -143,27 +120,16 @@ void Game::run()
                 }
                 pauseMenu(); //logic
                 break;
-            case FIRST_LEVEL:
-                if(!createdState[FIRST_LEVEL])
+            case PLAYING:
+                if(!createdState[PLAYING])
                 {
-                    setFirstLevel();
+                    setLevel("resources/Levels/NinjaLevelOne.tmx");
                     createdState[savedState] = false;
-                    createdState[FIRST_LEVEL] = true;
+                    createdState[PLAYING] = true;
                 }
-                firstLevel();
+                playLevel();
                 break;
-        }
-        auto end = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<float> duration = end - start;
-        float avg = countedFrames / duration.count() * 1000;
-        auto sleep = SCREEN_TICKS_PER_FRAME - duration.count();
-        //std::cout << sleep;
-        if(duration.count() * 1000 < SCREEN_TICKS_PER_FRAME)
-        {
-            std::this_thread::sleep_for(std::chrono::microseconds((int)(sleep*1000)));
-        }
-        //std::cout << 1/(sleep/1000) << "FPS" <<"\n";
-        countedFrames += 1;
+        } 
     }
 }
 
@@ -199,7 +165,7 @@ void Game::mainMenu()
         if(id == "startBtn")
         {
             createdState[state] = false;
-            state = FIRST_LEVEL;
+            state = PLAYING;
         }
         if(id == "exitBtn")
         {
@@ -219,14 +185,8 @@ void Game::setPauseMenu()
 
     Button firstBtn("firstBtn","First Level", &font);
 
-    Button secondBtn("secondBtn","Second Level", &font);
-
-    Button thirdBtn("thirdBtn","Third Level", &font);
-
     buttons.push_back(menuBtn);
     buttons.push_back(firstBtn);
-    buttons.push_back(secondBtn);
-    buttons.push_back(thirdBtn);
 }
 
 void Game::pauseMenu()
@@ -247,7 +207,8 @@ void Game::pauseMenu()
 
     window.draw(*player->getSprite());
 
-    drawUI();
+    Hud hud(player, &textures["Heart"]);
+    hud.draw(&window);
 
     pause.draw(&window);
 
@@ -263,7 +224,7 @@ void Game::pauseMenu()
         }
         else if(id == "firstBtn")
         {
-            state = FIRST_LEVEL;
+            state = PLAYING;
         }
         clicked = false;
     }
@@ -271,58 +232,126 @@ void Game::pauseMenu()
     window.display();
 }
 
-void Game::setFirstLevel()
+void Game::setLevel(std::string filename)
 {
     blocks.clear();
 
     entities.clear();
 
-    player->setHealth(5);
-
     sf::View view(sf::FloatRect(0.0f,0.0f,1920.0f,1080.0f));
+
+    //view.zoom(0.25f);
 
     window.setView(view);
 
-    //gets window size and set position of player sprite to middle of window
-    sf::Vector2f windowSize = (sf::Vector2f)window.getSize();
-    sf::Sprite *playerSprite = player->getSprite();
-    playerSprite->setPosition(windowSize.x/2 - playerSprite->getGlobalBounds().width/2, windowSize.y/2 - playerSprite->getGlobalBounds().height * 2 - 200);
-
-    int playerSize = playerSprite->getTexture()->getSize().x;
-
-    //creates line of blocks across the screen
-    for(int i = 0; i < windowSize.x; i += playerSize)
+    //allocates memory for player since there is no default constructor that allows global variable otherwise
+    if(player == NULL)
     {
-        Block b(&textures["Block"]);
-        b.getSprite()->setPosition(i,windowSize.y/2);
-        blocks.push_back(b);
+        player = new Player(&textures["Player"], 6.0f, 12.0f, 1.0f, 16, 16);  //instantiates player. passes player textures, max x-axis speed, max y-axis speed, and acceleration rate
     }
 
-    Block r(&textures["Block"]);
-    r.getSprite()->setPosition(900,476);
-    blocks.push_back(r);
+    player->setHealth(5);
 
-    Block w(&textures["Block"]);
-    w.getSprite()->setPosition(1220,476);
-    blocks.push_back(w);
+    //gets window size and set position of player sprite to middle of window
+    //sf::Vector2f windowSize = (sf::Vector2f)window.getSize();
+    //get info from xml files
+    
+    tinyxml2::XMLDocument level;
+    level.LoadFile(filename.c_str());
 
-    /*
-        entities is a vector of derived objects so it has contain pointers otherwise object splicing occurs. 
-        allocates memory for enemy otherwise data is only copied and the data that the pointer points to is
-        overwritten by the program with other variables.
-    */
-    Enemy *enemy = new Enemy(&textures["Player"],10.0f,12.0f,1.0f,64,64);
-    enemy->getSprite()->setPosition(1000,400);
-    entities.push_back(enemy);
+    tinyxml2::XMLDocument sheet;
+    sheet.LoadFile("resources/Levels/cavesofgallet.tsx");
 
-    NPC *npc = new NPC(&textures["Player"],10.0f,12.0f,1.0f,64,64,"Hello, my name is Adam! I love eating raw potatoes while watching Korean dramas. My favorite instrument is the ocarina I stole from my four year old cousin.");
-    npc->getSprite()->setPosition(500,476);
-    entities.push_back(npc);
+    int tileCount = std::stoi(sheet.RootElement()->Attribute("tilecount"));
+    int columns = std::stoi(sheet.RootElement()->Attribute("columns"));
+
+    int levelWidth = std::stoi(level.RootElement()->FirstChildElement("layer")->Attribute("width"));
+    int levelHeight = std::stoi(level.RootElement()->FirstChildElement("layer")->Attribute("height"));
+
+    int blockWidth = std::stoi(level.RootElement()->Attribute("tilewidth"));
+    int blockHeight = std::stoi(level.RootElement()->Attribute("tileheight"));
+
+    sf::Vector2f playerPosition;
+    std::vector<sf::Vector2f> enemyPositions;
+
+    auto element = level.RootElement()->FirstChildElement("objectgroup")->FirstChild();
+
+    sf::Sprite *playerSprite = player->getSprite();
+    playerSprite->setPosition(std::stoi(element->ToElement()->Attribute("x")),std::stoi(element->ToElement()->Attribute("y")));
+
+    element = level.RootElement()->FirstChildElement("objectgroup")->NextSibling()->FirstChild();
+    while(element != NULL)
+    {
+        Enemy *enemy = new Enemy(&textures["Player"],3.0f,4.0f,1.0f,16,16);
+        enemy->getSprite()->setPosition(std::stoi(element->ToElement()->Attribute("x")),std::stoi(element->ToElement()->Attribute("y")));
+        entities.push_back(enemy);
+        element = element->NextSibling();
+    }
+
+    // parse data to create blocks and rotate them
+    std::string d = level.RootElement()->FirstChildElement("layer")->FirstChildElement()->GetText();
+    
+    char c = d[1];
+    int i = 0;
+    int x = 0;
+    int y = 0;
+    std::vector<long> line;
+    std::string num;
+    while(c != '\0')
+    {
+        if(c == ',')
+        {
+            line.push_back(std::stol(num));
+            num.clear();
+            long val = line.back();
+            sf::Vector2f scale(1.0f,1.0f);
+            if(val > 0x80000000)
+            {
+                val -= 0x80000000;
+                scale.x *= -1;
+            }
+
+            if(val > 0x40000000)
+            {
+                val -= 0x40000000;
+                scale.y *= -1; 
+            }
+
+            if(val > tileCount)
+            {
+                val -= 1024;
+            }
+            else
+            {
+                
+            }
+
+            if(val > 0)
+            {
+                Block b(&textures["Block"],x * blockWidth,y * blockHeight,sf::IntRect(((val - 1) % columns) * blockWidth, ((val - 1) / columns) * blockHeight, blockWidth, blockHeight), scale);
+                blocks.push_back(b);
+            }
+            x++;
+        }
+        else if(c == '\n')
+        {
+            y += 1;
+            x = 0;
+        }
+        else
+        {
+            num.push_back(c);
+        }
+        i += 1;
+        c = d[i];
+    }
 }
 
-void Game::firstLevel()
+void Game::playLevel()
 {
     window.clear();
+
+    // check input
     
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)) //right
     {
@@ -341,10 +370,10 @@ void Game::firstLevel()
     {
         player->setLeft(false);
     }
-
+    
     player->move();
-
-    //playerCollision();
+   
+    // check collision 
     sf::Rect<float> a, b;
 
     a.left = player->getSprite()->getPosition().x;
@@ -359,8 +388,8 @@ void Game::firstLevel()
     {
         b.left = bl.getSprite()->getPosition().x;
         b.top = bl.getSprite()->getPosition().y;
-        b.width = 64;
-        b.height = 64;
+        b.width = bl.getSprite()->getGlobalBounds().width;
+        b.height = bl.getSprite()->getGlobalBounds().height;
 
         a.left += player->getXVel();
         checkX = checkCollision(a, b);
@@ -412,6 +441,8 @@ void Game::firstLevel()
     }
     
     player->getSprite()->move(player->getXVel(),player->getYVel());
+
+    //std::cout << player->getSprite()->getGlobalBounds().top;
     
     for(int i = 0; i <  entities.size(); i++)
     {
@@ -439,8 +470,6 @@ void Game::firstLevel()
                 t.setCharacterSize(20);
                 t.setFillColor(sf::Color::Blue);
                 t.setPosition(entity->getSprite()->getPosition().x,entity->getSprite()->getPosition().y - str.size());
-                //t.setString("hello");
-                //window.draw(t);
             
                 sf::RectangleShape background(sf::Vector2f(220,str.size() + 20));
 
@@ -454,7 +483,7 @@ void Game::firstLevel()
                 {
                     if(str[i] != '\n')
                     {
-                        std::cout << str[i];
+                        //std::cout << str[i];
                         part.push_back(str[i]);
                     }
                     else
@@ -486,8 +515,8 @@ void Game::firstLevel()
         {
             b.left = bl.getSprite()->getPosition().x;
             b.top = bl.getSprite()->getPosition().y;
-            b.width = 64;
-            b.height = 64;
+            b.width = bl.getSprite()->getGlobalBounds().width;
+            b.height = bl.getSprite()->getGlobalBounds().height;
 
             a.left += entity->getXVel();
             checkX = checkCollision(a, b);
@@ -541,6 +570,8 @@ void Game::firstLevel()
         entity->getSprite()->move(entity->getXVel(),entity->getYVel());
     }
 
+    // Drawing all Entities, Blocks, and UI to the screen
+
     sf::View view = window.getView();
     view.setCenter(player->getSprite()->getPosition());
 
@@ -558,7 +589,8 @@ void Game::firstLevel()
 
     window.draw(*player->getSprite());
 
-    drawUI();
+    Hud hud(player, &textures["Heart"]);
+    hud.draw(&window);
 
     window.display();
 }
@@ -665,22 +697,3 @@ void Game::handleInput(sf::Event *event)
         }
     }
 }
-
-void Game::drawUI()
-{
-    //draws hearts
-    for(int i = 0; i < player->getHealth(); i++)
-    {
-        sf::Vector2u textureSize = textures["Player"].at(1).getSize();
-        sf::RectangleShape heart(sf::Vector2f(64,64));
-        heart.setTexture(&textures["Player"].at(1));
-        sf::View view = window.getView();
-        heart.setPosition(view.getCenter().x - view.getSize().x / 2 + (i + 1) * 64, view.getCenter().y - view.getSize().y / 2 + 100);
-        window.draw(heart);
-    }
-}
-
-
-
-
-

@@ -1,3 +1,4 @@
+#pragma once
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/System/Clock.hpp>
@@ -13,6 +14,9 @@
 #include "Block.hpp"
 #include "Menu.hpp"
 #include "NPC.hpp"
+#include "Hud.hpp"
+#include "InputManager.hpp"
+#include "tinyxml2.h"
 
 const int SCREEN_FPS = 60;
 const int SCREEN_TICKS_PER_FRAME = 1000 / SCREEN_FPS;
@@ -26,10 +30,7 @@ class Game
         enum State {
             MAIN_MENU,
             PAUSE_MENU,
-            LOST_MENU,
-            FIRST_LEVEL,
-            SECOND_LEVEL,
-            THIRD_LEVEL
+            PLAYING
         };
 
         enum State state;
@@ -39,13 +40,12 @@ class Game
         bool createdState[sizeof(State)];
 
         //assets
-        std::map<std::string, std::vector<sf::Texture>> textures;
+        std::map<std::string, sf::Texture> textures;
         sf::Font font;
 
         //lists of interactable objecs
         std::vector<Entity*> entities;
         
-        // std::array<Block,1024> blocks;
         std::vector<Block> blocks;
 
         std::vector<Button> buttons;
@@ -70,17 +70,15 @@ class Game
         void mainMenu();
 
         //first level
-        void setFirstLevel();
-        void firstLevel();
+        void setLevel(std::string filename);
+        void playLevel();
 
         //pause menu
         void setPauseMenu();
         void pauseMenu();
 
         //collision and movement
-        void playerCollision();
         std::string mouseCollision();
         void handleInput(sf::Event *event);
         bool checkCollision(sf::Rect<float> a, sf::Rect<float> b);
-        void drawUI();
 };
