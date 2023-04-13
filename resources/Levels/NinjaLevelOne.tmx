@@ -39,7 +39,7 @@
     <property name="EnemyPosition" value=""/>
    </properties>
   </object>
-  <object id="4" name="enemyPosition" x="546" y="150.667" width="16" height="32">
+  <object id="4" name="enemyPosition" x="546" y="144" width="16" height="32">
    <properties>
     <property name="EnemyPosition" value=""/>
    </properties>
