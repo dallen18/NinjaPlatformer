@@ -1,9 +1,9 @@
 #include "headers/NPC.hpp"
 
-NPC::NPC(std::vector<sf::Texture> *textures, float xMax, float yMax, float accel, int xSize, int ySize, std::string m)
+NPC::NPC(sf::Texture *texture, float xMax, float yMax, float accel, int xSize, int ySize, std::string m)
 {
-    setTextures(textures);
-    getSprite()->setTexture(textures->front()); //sets initial texture of sprite as the first texture in list
+    setTexture(texture);
+    getSprite()->setTexture(*texture); //sets initial texture of sprite as the first texture in list
     setXVel(0.0f);
     setYVel(0.0f);
     setXMax(xMax);

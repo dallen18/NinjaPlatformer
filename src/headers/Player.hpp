@@ -3,6 +3,8 @@
     #include "Entity.hpp"
 #endif
 
+#define _Player
+
 class Player : public Entity
 {
     private:
@@ -16,8 +18,8 @@ class Player : public Entity
 
     public:
         //constructor
-        Player(std::vector<sf::Texture> *textures, float xMax, float yMax, float accel, int xSize, int ySize);
-
+        Player(sf::Texture *texture, float xMax, float yMax, float accel, int xSize, int ySize);
+        ~Player();
         //getter methods
         bool getContactBottom();
         bool getJumping();

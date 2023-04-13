@@ -1,4 +1,5 @@
 #include "headers/Player.hpp"
+#include <SFML/Graphics/Rect.hpp>
 #include <iostream>
 
 /*
@@ -9,10 +10,11 @@ Constructor of Player class. Takes the following Parameters:
     -float accel: sets acceleration rate for player
 
 */
-Player::Player(std::vector<sf::Texture> *textures, float xMax, float yMax, float accel, int xSize, int ySize)
+Player::Player(sf::Texture *texture, float xMax, float yMax, float accel, int xSize, int ySize)
 {   
-    setTextures(textures);
-    getSprite()->setTexture(textures->front()); //sets initial texture of sprite as the first texture in list
+    setTexture(texture);
+    getSprite()->setTexture(*texture);
+    getSprite()->setTextureRect(sf::IntRect(0,0,xSize,ySize));
     setXVel(0.0f);
     setYVel(0.0f);
     setXMax(xMax);
@@ -25,6 +27,11 @@ Player::Player(std::vector<sf::Texture> *textures, float xMax, float yMax, float
     jump = false;
     right = false;
     left = false;
+}
+
+Player::~Player()
+{
+    //delete this;
 }
 
 void Player::move()
