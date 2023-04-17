@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<controls num="4">
+    <control key="A" action="Left"/>
+    <control key="D" action="Right"/>
+    <control key="Space" action="Jump"/>
+    <control key="LeftClick" action="Attack"/>
+</controls>
