@@ -3,8 +3,11 @@
 #include "headers/tinyxml2.h"
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/System/Vector2.hpp>
+#include <SFML/Window/Keyboard.hpp>
+#include <SFML/Window/Mouse.hpp>
 #include <fstream>
 #include <string>
+#include <thread>
 
 Game::Game()
 {
@@ -67,7 +70,7 @@ void Game::loadTextures()
         std::cout << "failed to load image.";
     }
     
-    //inserts lists into map
+    //inserts textures into map
     textures["Player"] = playerTexture;
     textures["Heart"] = heartTexture;
     textures["Enemy"] = enemyTexture;
@@ -87,20 +90,41 @@ void Game::run()
     state = MAIN_MENU;
     savedState = state;
 
+    input = InputManager::getInstance();
+
     while (window.isOpen())
     {
         sf::Event event;
 
-        while (window.pollEvent(event))
+        while(window.pollEvent(event))
         {
             if (event.type == sf::Event::Closed)
             {
                 window.close();
             }
-
-            handleInput(&event);
         }
 
+        input->checkPlayerInput();
+        auto pressed = input->getPressed();
+
+        if(player != NULL)
+        {
+            if((*pressed)["Right"]) //right
+            {
+                player->setRight(true);
+            }
+
+            if((*pressed)["Left"])
+            {
+                player->setLeft(true);
+            }
+            
+            if((*pressed)["Jump"])
+            {
+                player->setJumping(true);
+            }
+        } 
+        
         switch(state)
         {
             case MAIN_MENU:
@@ -158,10 +182,9 @@ void Game::mainMenu()
 
     menu.draw(&window);
 
-    std::string id = mouseCollision();
-
-    if(id != "" && clicked)
+    if(input->checkOtherInput(sf::Mouse::Left, 1))
     {
+        std::string id = mouseCollision();
         if(id == "startBtn")
         {
             createdState[state] = false;
@@ -171,7 +194,6 @@ void Game::mainMenu()
         {
             window.close();
         }
-        clicked = false;
     }
 
     window.display();
@@ -192,6 +214,12 @@ void Game::setPauseMenu()
 void Game::pauseMenu()
 {
     window.clear();
+
+    if(input->checkOtherInput(sf::Keyboard::Escape, 0))
+    {
+        createdState[state] = false;
+        state = savedState;
+    }
     
     Menu pause("Paused",&buttons,&font);
 
@@ -212,10 +240,9 @@ void Game::pauseMenu()
 
     pause.draw(&window);
 
-    std::string id = mouseCollision();
-
-    if(id != "" && clicked)
+    if(input->checkOtherInput(sf::Mouse::Left, 1))
     {
+        std::string id = mouseCollision();
         if(id == "menuBtn")
         {
             createdState[savedState] = false;
@@ -226,7 +253,6 @@ void Game::pauseMenu()
         {
             state = PLAYING;
         }
-        clicked = false;
     }
 
     window.display();
@@ -252,15 +278,16 @@ void Game::setLevel(std::string filename)
 
     player->setHealth(5);
 
-    //gets window size and set position of player sprite to middle of window
-    //sf::Vector2f windowSize = (sf::Vector2f)window.getSize();
     //get info from xml files
     
     tinyxml2::XMLDocument level;
     level.LoadFile(filename.c_str());
 
+    // the source image isn't taken as of now from the .tsx file but will be in the future if we add more tile sets
+    std::string source = "resources/Levels/";
+    source += level.RootElement()->FirstChild()->ToElement()->Attribute("source");
     tinyxml2::XMLDocument sheet;
-    sheet.LoadFile("resources/Levels/cavesofgallet.tsx");
+    sheet.LoadFile(source.c_str());
 
     int tileCount = std::stoi(sheet.RootElement()->Attribute("tilecount"));
     int columns = std::stoi(sheet.RootElement()->Attribute("columns"));
@@ -351,26 +378,12 @@ void Game::playLevel()
 {
     window.clear();
 
-    // check input
-    
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)) //right
+    if(input->checkOtherInput(sf::Keyboard::Escape, 0))
     {
-        player->setRight(true);
+        savedState = state;
+        state = PAUSE_MENU;
     }
-    else
-    {
-        player->setRight(false);
-    }
-    
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)) //left
-    {
-        player->setLeft(true);
-    }
-    else
-    {
-        player->setLeft(false);
-    }
-    
+
     player->move();
    
     // check collision 
@@ -386,8 +399,8 @@ void Game::playLevel()
 
     for(Block bl : blocks)
     {
-        b.left = bl.getSprite()->getPosition().x;
-        b.top = bl.getSprite()->getPosition().y;
+        b.left = bl.getX();
+        b.top = bl.getY();
         b.width = bl.getSprite()->getGlobalBounds().width;
         b.height = bl.getSprite()->getGlobalBounds().height;
 
@@ -442,8 +455,6 @@ void Game::playLevel()
     
     player->getSprite()->move(player->getXVel(),player->getYVel());
 
-    //std::cout << player->getSprite()->getGlobalBounds().top;
-    
     for(int i = 0; i <  entities.size(); i++)
     {
         Entity *entity = entities.at(i);
@@ -513,8 +524,8 @@ void Game::playLevel()
 
         for(Block bl : blocks)
         {
-            b.left = bl.getSprite()->getPosition().x;
-            b.top = bl.getSprite()->getPosition().y;
+            b.left = bl.getX();
+            b.top = bl.getY();
             b.width = bl.getSprite()->getGlobalBounds().width;
             b.height = bl.getSprite()->getGlobalBounds().height;
 
@@ -655,45 +666,4 @@ std::string Game::mouseCollision()
     }
 
     return "";
-}
-
-void Game::handleInput(sf::Event *event)
-{
-    if(event->type == sf::Event::KeyPressed)
-    {   
-        if(state != MAIN_MENU && state != PAUSE_MENU)
-        {
-            if(event->key.code == sf::Keyboard::Escape)
-            {
-                savedState = state;
-                state = PAUSE_MENU;
-            }
-
-            if(event->key.code == sf::Keyboard::Space)
-            {
-                if(player->getContactBottom())
-                {
-                    player->setJumping(true);
-                }
-            }
-        }
-        else if(state == PAUSE_MENU)
-        {
-            if(event->key.code == sf::Keyboard::Escape)
-            {
-                createdState[state] = false;
-                state = savedState;
-            }
-        }
-    }
-    else if(event->type == sf::Event::MouseButtonPressed)
-    {
-        if(state == MAIN_MENU || state == PAUSE_MENU)
-        {
-            if(event->mouseButton.button == sf::Mouse::Left)
-            {
-                clicked = true;
-            }
-        }
-    }
 }

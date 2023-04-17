@@ -27,7 +27,8 @@ class Game
         sf::RenderWindow window;
 
         //state of game
-        enum State {
+        enum State 
+        {
             MAIN_MENU,
             PAUSE_MENU,
             PLAYING
@@ -52,7 +53,7 @@ class Game
 
         Player *player;
 
-        bool clicked = false;
+        InputManager *input;
 
     public:
         Game();
@@ -79,6 +80,5 @@ class Game
 
         //collision and movement
         std::string mouseCollision();
-        void handleInput(sf::Event *event);
         bool checkCollision(sf::Rect<float> a, sf::Rect<float> b);
 };
