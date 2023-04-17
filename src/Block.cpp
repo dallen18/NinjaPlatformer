@@ -4,22 +4,22 @@
 
 Block::Block(sf::Texture *t, int _x, int _y,sf::IntRect rect, sf::Vector2f s)
 {
-    int x = _x;
-    int y = _y;
+    x = _x;
+    y = _y;
     texture = t;
     sprite.setTexture(*texture); //sets initial texture of sprite as the first texture in list
     sprite.setTextureRect(rect);
-    //sprite.setScale(s);
+    sprite.setScale(s);
     sprite.setPosition(x,y);
-    /*if(s.x == -1)
+    if(s.x == -1)
     {
-        sprite.move(sprite.getGlobalBounds().width,0);
+        sprite.move(rect.width,0);
     }
 
     if(s.y == -1)
     {
-        sprite.move(0,sprite.getGlobalBounds().height);
-    }*/
+        sprite.move(0,rect.height);
+    }
 }
 
 Block::~Block()

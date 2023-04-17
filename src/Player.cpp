@@ -8,7 +8,6 @@ Constructor of Player class. Takes the following Parameters:
     -float xMax: sets max speed in the x-axis for player
     -float yMax: sets max speed in the y-axis for player
     -float accel: sets acceleration rate for player
-
 */
 Player::Player(sf::Texture *texture, float xMax, float yMax, float accel, int xSize, int ySize)
 {   
@@ -48,6 +47,7 @@ void Player::move()
         {
             xVel += accel;
         }
+        setRight(false);
     }
     else if(left) //left
     {
@@ -55,6 +55,7 @@ void Player::move()
         {
             xVel -= accel;
         }
+        setLeft(false);
     }
     else
     {
@@ -68,13 +69,8 @@ void Player::move()
         }
     }
 
-    if(getJumping()) //up
+    if(getJumping() && contactBottom) //up
     {
-        // if(yVel == 0 && getContactBottom())
-        // {
-        //     yVel = -yMax;
-        //     setContactBottom(false);
-        // }
         yVel = -yMax;
         setContactBottom(false);
         setJumping(false);
@@ -85,6 +81,7 @@ void Player::move()
         {
             yVel += accel;
         }
+        setContactBottom(false);
     }
 
     setXVel(xVel);
