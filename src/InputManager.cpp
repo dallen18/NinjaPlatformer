@@ -1,6 +1,7 @@
 #include "headers/InputManager.hpp"
 #include "headers/tinyxml2.h"
 #include <SFML/Window/Keyboard.hpp>
+#include <SFML/Window/Mouse.hpp>
 #include <unordered_map>
 
 InputManager* InputManager::instancePtr = NULL;
@@ -59,6 +60,10 @@ void InputManager::checkPlayerInput()
         {
             k = sf::Keyboard::Space;
         }
+        else if(pair.first == "LeftClick")
+        {
+            //k = sf::Mouse::Left;
+        }
         else
         {
             k = sf::Keyboard::Unknown;
@@ -91,7 +96,21 @@ void InputManager::checkPlayerInput()
             }
             pressed[pair.second] = false;
         }
-    } 
+    }
+
+    if(sf::Mouse::isButtonPressed(sf::Mouse::Left))
+    {
+        if(!buttons[sf::Mouse::Left])
+        {
+            pressed["Attack"] = true;
+            buttons[sf::Mouse::Left] = true;
+        }
+    }
+    else
+    {
+        buttons[sf::Mouse::Left] = false;
+        pressed["Attack"] = false;
+    }
 }
 
 bool InputManager::checkOtherInput(int code, int type)
