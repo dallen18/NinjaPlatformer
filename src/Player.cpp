@@ -1,6 +1,8 @@
 #include "headers/Player.hpp"
 #include <SFML/Graphics/Rect.hpp>
+#include <SFML/System/Vector2.hpp>
 #include <iostream>
+#include <cmath>
 
 /*
 Constructor of Player class. Takes the following Parameters:
@@ -9,7 +11,7 @@ Constructor of Player class. Takes the following Parameters:
     -float yMax: sets max speed in the y-axis for player
     -float accel: sets acceleration rate for player
 */
-Player::Player(sf::Texture *texture, float xMax, float yMax, float accel, int xSize, int ySize)
+Player::Player(sf::Texture *texture, float xMax, float yMax, float accel, int xSize, int ySize, int x, int y)
 {   
     setTexture(texture);
     getSprite()->setTexture(*texture);
@@ -21,6 +23,8 @@ Player::Player(sf::Texture *texture, float xMax, float yMax, float accel, int xS
     setAccel(accel);
     setXSize(xSize);
     setYSize(ySize);
+    //setX(x);
+    //setY(y);
 
     contactBottom = false;
     jump = false;
@@ -29,7 +33,7 @@ Player::Player(sf::Texture *texture, float xMax, float yMax, float accel, int xS
 }
 
 Player::~Player()
-{
+{ 
     //delete this;
 }
 
@@ -85,7 +89,32 @@ void Player::move()
     }
 
     setXVel(xVel);
-    setYVel(yVel);
+    setYVel(yVel); 
+}
+
+void Player::createAttack()
+{
+    sf::Vector2f mousePos = (sf::Vector2f)sf::Mouse::getPosition();
+    sf::Vector2f playerPos = {960,540};
+    sf::Vector2f difference = mousePos - playerPos;
+    float hypotenuse = std::sqrt(std::pow(difference.x,2) + std::pow(difference.y,2));
+    float velX = 10 * difference.x / hypotenuse;
+    float velY = 10 * difference.y / hypotenuse;
+    if(num > 0)
+    {
+        shurikens.push_back(new Projectile(getTexture(), velX, velY, getX(), getY()));
+        num -= 1;
+    }
+}
+
+std::vector<Projectile*> *Player::getShurikens()
+{
+    return &shurikens;
+}
+
+bool Player::getAttack()
+{
+    return attack;
 }
 
 bool Player::getContactBottom()
@@ -111,6 +140,11 @@ bool Player::getLeft()
 int Player::getHealth()
 {
     return health;
+}
+
+void Player::setAttack(bool b)
+{
+    attack = b;
 }
 
 void Player::setJumping(bool b)
