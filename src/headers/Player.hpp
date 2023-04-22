@@ -1,4 +1,6 @@
 #include <SFML/Graphics.hpp>
+#include <vector>
+#include "Projectile.hpp"
 #ifndef _Entity
     #include "Entity.hpp"
 #endif
@@ -9,16 +11,17 @@ class Player : public Entity
 {
     private:
         bool contactBottom; 
-        
         int health;
-
+        bool attack;
         bool jump;
         bool right;
         bool left;
+        int num = 20;
+        std::vector<Projectile*> shurikens;
 
     public:
         //constructor
-        Player(sf::Texture *texture, float xMax, float yMax, float accel, int xSize, int ySize);
+        Player(sf::Texture *texture, float xMax, float yMax, float accel, int xSize, int ySize, int x, int y);
         ~Player();
         //getter methods
         bool getContactBottom();
@@ -26,6 +29,8 @@ class Player : public Entity
         bool getRight();
         bool getLeft();
         int getHealth();
+        bool getAttack();
+        std::vector<Projectile*> *getShurikens();
 
         //setter methods
         void setContactBottom(bool b);
@@ -34,8 +39,10 @@ class Player : public Entity
         void setLeft(bool b);
         void setHealth(int h);
         void decreaseHealth();
+        void setAttack(bool b);
 
         void move();
+        void createAttack();
 
         //other methods
         void animation();
