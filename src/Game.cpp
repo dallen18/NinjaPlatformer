@@ -131,6 +131,19 @@ void Game::run()
             {
                 player->setAttack(true);
             }
+
+            if((*pressed)["Switch"])
+            {
+                int i = player->getMethod();
+                if(i == 0)
+                {
+                    player->setMethod(1);
+                }
+                else
+                {
+                    player->setMethod(0);
+                }
+            }
         }
 
         switch(state)
@@ -421,7 +434,6 @@ void Game::playLevel()
     if(player->getAttack())
     { 
         player->createAttack();
-        player->setAttack(false);
     }
 
     // check collision 
@@ -717,26 +729,80 @@ void Game::playLevel()
     view.setCenter(player->getSprite()->getPosition());
 
     window.setView(view);
-
-    sf::Vector2f mousePos = (sf::Vector2f)sf::Mouse::getPosition();
-    sf::Vector2f playerPos = {960,540};
-    sf::Vector2f difference = mousePos - playerPos;
-    float hypotenuse = std::sqrt(std::pow(difference.x,2) + std::pow(difference.y,2));
-    float angle = std::atan(difference.y/difference.x);
-    int multiplier = 1;
-    if(difference.x < 0)
+    if(player->getMethod() == 0)
     {
-        multiplier = -1;
+        sf::Vector2f mousePos = (sf::Vector2f)sf::Mouse::getPosition();
+        sf::Vector2f playerPos = {960,540};
+        sf::Vector2f difference = mousePos - playerPos;
+        float hypotenuse = std::sqrt(std::pow(difference.x,2) + std::pow(difference.y,2));
+        float angle = std::atan(difference.y/difference.x);
+        int multiplier = 1;
+        if(difference.x < 0)
+        {
+            multiplier = -1;
+        }
+        sf::Vector2f pointerPos;
+        pointerPos.x = multiplier * 100 * std::cos(angle) + player->getSprite()->getGlobalBounds().left;
+        pointerPos.y = multiplier * 100 * std::sin(angle) + player->getSprite()->getGlobalBounds().top;
+        sf::RectangleShape rectangle;
+        rectangle.setSize(sf::Vector2f{10,10});
+        rectangle.setFillColor(sf::Color::Red);
+        rectangle.setPosition(pointerPos);
+        window.draw(rectangle);
     }
-    sf::Vector2f pointerPos;
-    pointerPos.x = multiplier * 100 * std::cos(angle) + player->getSprite()->getGlobalBounds().left;
-    pointerPos.y = multiplier * 100 * std::sin(angle) + player->getSprite()->getGlobalBounds().top;
-    sf::RectangleShape rectangle;
-    rectangle.setSize(sf::Vector2f{10,10});
-    rectangle.setFillColor(sf::Color::Red);
-    rectangle.setPosition(pointerPos);
-    window.draw(rectangle);
+    else
+    {
+        if(player->getAttack() == true)
+        {
+            sf::RectangleShape rect;
+            rect.setSize(sf::Vector2f{66,16});
+            rect.setFillColor(sf::Color::Red);
+            sf::Vector2f m = (sf::Vector2f) sf::Mouse::getPosition();
+            if(m.x > 960)
+            {
+                rect.setPosition(player->getSprite()->getGlobalBounds().left,player->getSprite()->getGlobalBounds().top);
+            }
+            else
+            {
+                rect.setPosition(player->getSprite()->getGlobalBounds().left - 50,player->getSprite()->getGlobalBounds().top);
+            }
+            a.left = rect.getGlobalBounds().left;
+            a.top = rect.getGlobalBounds().top;
+            a.width = rect.getGlobalBounds().width;
+            a.height = rect.getGlobalBounds().height;
 
+            for(int i = 0; i < entities.size(); i++)
+            {
+                Entity *entity = entities.at(i);
+                b.left = entity->getSprite()->getPosition().x;
+                b.top = entity->getSprite()->getPosition().y;
+                b.width = entity->getXSize();
+                b.height = entity->getYSize();
+                checkX = false;
+                checkY = false;
+
+                checkX = checkCollision(a, b);
+                if(checkX)
+                {
+                    if(entity->getClass() == "Enemy")
+                    {
+                        entities.erase(entities.begin() + i);
+                        continue;
+                    }
+                }
+
+                if(checkY)
+                {
+                    if(entity->getClass() == "Enemy")
+                    {
+                        entities.erase(entities.begin() + i);
+                        continue;
+                    }
+                }
+            }
+            window.draw(rect);
+        }
+    }
 
     for(Block block : blocks)
     {
