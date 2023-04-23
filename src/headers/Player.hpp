@@ -1,4 +1,6 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Graphics/RectangleShape.hpp>
+#include <chrono>
 #include <vector>
 #include "Projectile.hpp"
 #ifndef _Entity
@@ -12,12 +14,15 @@ class Player : public Entity
     private:
         bool contactBottom; 
         int health;
+        int method;
         bool attack;
         bool jump;
         bool right;
         bool left;
         int num = 20;
         std::vector<Projectile*> shurikens;
+        sf::RectangleShape rect;
+        std::chrono::time_point<std::chrono::steady_clock> time;
 
     public:
         //constructor
@@ -30,6 +35,7 @@ class Player : public Entity
         bool getLeft();
         int getHealth();
         bool getAttack();
+        int getMethod();
         std::vector<Projectile*> *getShurikens();
 
         //setter methods
@@ -40,6 +46,7 @@ class Player : public Entity
         void setHealth(int h);
         void decreaseHealth();
         void setAttack(bool b);
+        void setMethod(int i);
 
         void move();
         void createAttack();

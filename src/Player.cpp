@@ -1,6 +1,7 @@
 #include "headers/Player.hpp"
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/System/Vector2.hpp>
+#include <chrono>
 #include <iostream>
 #include <cmath>
 
@@ -94,17 +95,31 @@ void Player::move()
 
 void Player::createAttack()
 {
-    sf::Vector2f mousePos = (sf::Vector2f)sf::Mouse::getPosition();
-    sf::Vector2f playerPos = {960,540};
-    sf::Vector2f difference = mousePos - playerPos;
-    float hypotenuse = std::sqrt(std::pow(difference.x,2) + std::pow(difference.y,2));
-    float velX = 10 * difference.x / hypotenuse;
-    float velY = 10 * difference.y / hypotenuse;
-    if(num > 0)
+    if(method == 0)
     {
-        shurikens.push_back(new Projectile(getTexture(), velX, velY, getX(), getY()));
-        num -= 1;
+        sf::Vector2f mousePos = (sf::Vector2f)sf::Mouse::getPosition();
+        sf::Vector2f playerPos = {960,540};
+        sf::Vector2f difference = mousePos - playerPos;
+        float hypotenuse = std::sqrt(std::pow(difference.x,2) + std::pow(difference.y,2));
+        float velX = 10 * difference.x / hypotenuse;
+        float velY = 10 * difference.y / hypotenuse;
+        if(num > 0)
+        {
+            shurikens.push_back(new Projectile(getTexture(), velX, velY, getX(), getY()));
+            num -= 1;
+        }
+        setAttack(false);
     }
+}
+
+int Player::getMethod()
+{
+    return method;
+}
+
+void Player::setMethod(int i)
+{
+    method = i;
 }
 
 std::vector<Projectile*> *Player::getShurikens()
@@ -114,6 +129,15 @@ std::vector<Projectile*> *Player::getShurikens()
 
 bool Player::getAttack()
 {
+    if(attack)
+    {
+        auto curr = std::chrono::steady_clock::now();
+        std::chrono::duration<double> elapsed = curr - time;
+        if(elapsed.count() > .5)
+        {
+            setAttack(false);
+        }
+    }
     return attack;
 }
 
@@ -144,6 +168,10 @@ int Player::getHealth()
 
 void Player::setAttack(bool b)
 {
+    if(b)
+    {
+        time = std::chrono::steady_clock::now();
+    }
     attack = b;
 }
 
