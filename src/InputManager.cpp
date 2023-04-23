@@ -60,9 +60,9 @@ void InputManager::checkPlayerInput()
         {
             k = sf::Keyboard::Space;
         }
-        else if(pair.first == "LeftClick")
+        else if(pair.first == "Control")
         {
-            //k = sf::Mouse::Left;
+            k = sf::Keyboard::LControl;
         }
         else
         {
@@ -71,7 +71,7 @@ void InputManager::checkPlayerInput()
 
         if(sf::Keyboard::isKeyPressed(k))
         {
-            if(pair.second == "Jump")
+            if(pair.second == "Jump" || pair.second == "Switch")
             {
                 if(!keys[k])
                 {
@@ -90,7 +90,7 @@ void InputManager::checkPlayerInput()
         }
         else
         {
-            if(pair.second == "Jump")
+            if(pair.second == "Jump" || pair.second == "Switch")
             {
                 keys[k] = false;
             }
