@@ -11,6 +11,7 @@
 
 Game::Game()
 {
+    player = NULL;
     initWindow();
 
     loadTextures();
@@ -69,7 +70,8 @@ void Game::loadTextures()
     {
         std::cout << "failed to load image.";
     }
-    
+
+
     //inserts textures into map
     textures["Player"] = playerTexture;
     textures["Heart"] = heartTexture;
@@ -89,9 +91,7 @@ void Game::run()
     //sets initial state of game at main menu
     state = MAIN_MENU;
     savedState = state;
-
     input = InputManager::getInstance();
-
     while (window.isOpen())
     {
         sf::Event event;
@@ -101,6 +101,7 @@ void Game::run()
             if (event.type == sf::Event::Closed)
             {
                 window.close();
+                std:: cout <<"a";
             }
         }
 
@@ -181,6 +182,7 @@ void Game::mainMenu()
     Menu menu("Ninja Platformer",&buttons,&font);
 
     menu.draw(&window);
+
 
     if(input->checkOtherInput(sf::Mouse::Left, 1))
     {
@@ -264,22 +266,22 @@ void Game::setLevel(std::string filename)
 
     entities.clear();
 
-    sf::View view(sf::FloatRect(0.0f,0.0f,1920.0f,1080.0f));
+    sf::View view(sf::FloatRect(0.0f,0.0f,853.33f,480.0f));
 
     //view.zoom(0.25f);
 
     window.setView(view);
-
     //allocates memory for player since there is no default constructor that allows global variable otherwise
     if(player == NULL)
     {
-        player = new Player(&textures["Player"], 6.0f, 12.0f, 1.0f, 16, 16);  //instantiates player. passes player textures, max x-axis speed, max y-axis speed, and acceleration rate
+
+        player = new Player(&textures["Player"], 4.0f, 11.0f, 0.75f, 16, 16);  //instantiates player. passes player textures, max x-axis speed, max y-axis speed, and acceleration rate
     }
 
-    player->setHealth(5);
+
+    player->setHealth(3);
 
     //get info from xml files
-    
     tinyxml2::XMLDocument level;
     level.LoadFile(filename.c_str());
 
@@ -297,15 +299,11 @@ void Game::setLevel(std::string filename)
 
     int blockWidth = std::stoi(level.RootElement()->Attribute("tilewidth"));
     int blockHeight = std::stoi(level.RootElement()->Attribute("tileheight"));
-
     sf::Vector2f playerPosition;
     std::vector<sf::Vector2f> enemyPositions;
-
     auto element = level.RootElement()->FirstChildElement("objectgroup")->FirstChild();
-
     sf::Sprite *playerSprite = player->getSprite();
     playerSprite->setPosition(std::stoi(element->ToElement()->Attribute("x")),std::stoi(element->ToElement()->Attribute("y")));
-
     element = level.RootElement()->FirstChildElement("objectgroup")->NextSibling()->FirstChild();
     while(element != NULL)
     {
@@ -314,23 +312,23 @@ void Game::setLevel(std::string filename)
         entities.push_back(enemy);
         element = element->NextSibling();
     }
-
     // parse data to create blocks and rotate them
     std::string d = level.RootElement()->FirstChildElement("layer")->FirstChildElement()->GetText();
-    
     char c = d[1];
     int i = 0;
     int x = 0;
     int y = 0;
-    std::vector<long> line;
+    //std::vector<long> line;
     std::string num;
+    long long val = 0;
     while(c != '\0')
     {
         if(c == ',')
         {
-            line.push_back(std::stol(num));
+            val = std::stoll(num);
+            //line.push_back(std::stol(num
             num.clear();
-            long val = line.back();
+            //long val = line.back();
             sf::Vector2f scale(1.0f,1.0f);
             if(val > 0x80000000)
             {
@@ -385,6 +383,7 @@ void Game::playLevel()
     }
 
     player->move();
+
    
     // check collision 
     sf::Rect<float> a, b;
@@ -393,6 +392,10 @@ void Game::playLevel()
     a.top = player->getSprite()->getPosition().y;
     a.width = player->getXSize();
     a.height = player->getYSize();
+    if((player->getSprite()->getPosition()).y>480){
+        createdState[state] = false;
+        state = MAIN_MENU;
+    }
     
     bool checkX;
     bool checkY;
@@ -468,6 +471,7 @@ void Game::playLevel()
                 player->decreaseHealth();
                 if(player->getHealth() == 0)
                 {
+                    createdState[state] = false;
                     state = MAIN_MENU;
                 }
                 entities.erase(entities.begin() + i);
@@ -584,8 +588,15 @@ void Game::playLevel()
     // Drawing all Entities, Blocks, and UI to the screen
 
     sf::View view = window.getView();
-    view.setCenter(player->getSprite()->getPosition());
-
+    //view.setCenter(player->getSprite()->getPosition());
+    int position1 = player->getSprite()->getPosition().x;
+    if (position1<480){
+        position1 = 480;
+    }
+    if (position1>2770){
+        position1=2770;
+    }
+    view.setCenter(position1,240);
     window.setView(view);
 
     for(Block block : blocks)
