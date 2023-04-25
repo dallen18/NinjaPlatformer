@@ -239,10 +239,26 @@ void Game::pauseMenu()
 {
     window.clear();
 
-    sf::View vie(sf::FloatRect(0.0f,0.0f,1920.0f,1080.0f));
-    vie.setCenter(player->getSprite()->getPosition());
+    // sf::View vie(sf::FloatRect(0.0f,0.0f,1920.0f,1080.0f));
+    // vie.setCenter(player->getSprite()->getPosition());
+    // vie.zoom(0.5f);
+    // window.setView(vie);
+    sf::View vie(sf::FloatRect(0.0f,0.0f, 1920.0f, 1080.0f));
     vie.zoom(0.5f);
+    int position1 = player->getSprite()->getPosition().x;
+    if(position1 < 480)
+    {
+        position1 = 480;
+    }
+    if(position1 > 2770)
+    {
+        position1 = 2770;
+    }   
+
+    vie.setCenter(position1,player->getSprite()->getPosition().y);
+
     window.setView(vie);
+
 
     if(input->checkOtherInput(sf::Keyboard::Escape, 0))
     {
@@ -697,17 +713,17 @@ void Game::playLevel()
                 if(a.top < b.top)
                 {
                     a.top = b.top - a.height;
+                    if(entity->getClass() == "Enemy")
+                    {
+                        ((Enemy*)entity)->setContactBottom(true);
+                    }
                 }
                 else
                 {
-                    a.top = b.top + b.height;
+                    a.top = b.top + b.height; 
                 }
                 entity->getSprite()->setPosition(a.left,a.top);
-                entity->setYVel(0);
-                if(entity->getClass() == "Enemy")
-                {
-                    ((Enemy*)entity)->setContactBottom(true);
-                }
+                entity->setYVel(0); 
             }
             else
             {
