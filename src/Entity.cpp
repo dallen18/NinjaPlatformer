@@ -1,8 +1,34 @@
 #include "headers/Entity.hpp"
+#include <SFML/Graphics/Texture.hpp>
+
+float Entity::getX()
+{
+    return x;
+}
+
+float Entity::getY()
+{
+    return y;
+}
+
+void Entity::setX(float v)
+{
+    x = v;
+}
+
+void Entity::setY(float v)
+{
+    y = v;
+}
 
 sf::Sprite *Entity::getSprite()
 {
     return &sprite;
+}
+
+sf::Texture *Entity::getTexture()
+{
+    return texture;
 }
 
 float Entity::getXVel()

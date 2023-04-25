@@ -5,4 +5,5 @@
     <control key="D" action="Right"/>
     <control key="Space" action="Jump"/>
     <control key="LeftClick" action="Attack"/>
+    <control key="Control" action="Switch"/>
 </controls>

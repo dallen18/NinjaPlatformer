@@ -22,6 +22,7 @@ void Hud::draw(sf::RenderWindow *w)
         sf::RectangleShape heart(sf::Vector2f(64,64));
         heart.setTexture(heartTexture);
         sf::View view = w->getView();
+        //heart.setPosition((view.getCenter().x - view.getSize().x / 2 + (i + 1) * 64)-48, 400);
         heart.setPosition(view.getCenter().x - view.getSize().x / 2 + (i + 1) * 64, view.getCenter().y - view.getSize().y / 2 + 100);
         w->draw(heart);
     }
