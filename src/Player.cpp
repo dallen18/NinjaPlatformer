@@ -1,5 +1,6 @@
 #include "headers/Player.hpp"
 #include <SFML/Graphics/Rect.hpp>
+#include <SFML/Graphics/View.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <chrono>
 #include <iostream>
@@ -93,12 +94,40 @@ void Player::move()
     setYVel(yVel); 
 }
 
-void Player::createAttack()
+void Player::createAttack(const sf::View &view)
 {
     if(method == 0)
     {
         sf::Vector2f mousePos = (sf::Vector2f)sf::Mouse::getPosition();
-        sf::Vector2f playerPos = {960,540};
+        //if()
+        int position1 = getSprite()->getPosition().x;
+        bool t = false;
+        if(position1 < 480)
+        {
+            //t = true;
+        }
+        if(position1 > 2770)
+        {
+            //t = true;
+        }
+        mousePos.x = mousePos.x / 2;
+        mousePos.y = mousePos.y / 2;
+
+        if(!t)
+        {
+            mousePos += view.getCenter();
+            std::cout << view.getCenter().x << "\n";
+        }
+        else
+        {
+            mousePos += sf::Vector2f{getX(),getY()};
+        }
+        mousePos.x -= 480;
+        mousePos.y -= 270;
+
+        sf::Vector2f playerPos = {getX(),getY()};
+        //std::cout << playerPos.x << ", " << playerPos.y <<"\n";
+        //std::cout << mousePos.x << ", " << mousePos.y << "\n";
         sf::Vector2f difference = mousePos - playerPos;
         float hypotenuse = std::sqrt(std::pow(difference.x,2) + std::pow(difference.y,2));
         float velX = 10 * difference.x / hypotenuse;

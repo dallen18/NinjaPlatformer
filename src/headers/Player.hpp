@@ -49,7 +49,7 @@ class Player : public Entity
         void setMethod(int i);
 
         void move();
-        void createAttack();
+        void createAttack(const sf::View &view);
 
         //other methods
         void animation();
