@@ -313,7 +313,7 @@ void Game::setLevel(std::string filename)
     //allocates memory for player since there is no default constructor that allows global variable otherwise
     if(player == NULL)
     {
-        player = new Player(&textures["Player"], 6.0f, 12.0f, 1.0f, 16, 16, 0, 0);  //instantiates player. passes player textures, max x-axis speed, max y-axis speed, and acceleration rate
+        player = new Player(&textures["Player"], 4.0f, 16.0f, 1.0f, 16, 16, 0, 0);  //instantiates player. passes player textures, max x-axis speed, max y-axis speed, and acceleration rate
         player->setHealth(5);
     }
 
@@ -369,13 +369,15 @@ void Game::setLevel(std::string filename)
     int y = 0;
     std::vector<long> line;
     std::string num;
+    long long val = 0;
     while(c != '\0')
     {
         if(c == ',')
         {
-            line.push_back(std::stol(num));
+            val = std::stoll(num);
+            //line.push_back(std::stol(num));
             num.clear();
-            long val = line.back();
+            //long val = line.back();
             sf::Vector2f scale(1.0f,1.0f);
             if(val > 0x80000000)
             {
@@ -429,12 +431,7 @@ void Game::playLevel()
         state = PAUSE_MENU;
     }
 
-    player->move();
-
-    if(player->getAttack())
-    { 
-        player->createAttack();
-    }
+    player->move(); 
 
     // check collision 
     sf::Rect<float> a, b;
@@ -513,12 +510,17 @@ void Game::playLevel()
             shuriken->setX(shuriken->getX() + shuriken->getXVel());
             shuriken->setY(shuriken->getY() + shuriken->getYVel());
         }
-    }
+    } 
 
     a.left = player->getSprite()->getPosition().x;
     a.top = player->getSprite()->getPosition().y;
     a.width = player->getXSize();
     a.height = player->getYSize();
+    if(player->getSprite()->getPosition().y > 480)
+    {
+        createdState[state] = false;
+        state = MAIN_MENU;
+    }
     
     checkX = false;
     checkY = false;
@@ -544,6 +546,8 @@ void Game::playLevel()
                 a.left = b.left + b.width;
             }
             player->getSprite()->setPosition(a.left,a.top);
+            player->setX(player->getSprite()->getPosition().x);
+            player->setY(player->getSprite()->getPosition().y);
             player->setXVel(0);
         }
         else
@@ -565,6 +569,8 @@ void Game::playLevel()
                 a.top = b.top + b.height;
             }
             player->getSprite()->setPosition(a.left,a.top);
+            player->setX(player->getSprite()->getPosition().x);
+            player->setY(player->getSprite()->getPosition().y);
             player->setYVel(0);
             player->setContactBottom(true);
         }
@@ -726,17 +732,45 @@ void Game::playLevel()
     sf::View view = window.getView();
     view.zoom(0.5f);
     window.setView(view);
-    view.setCenter(player->getSprite()->getPosition());
+    //view.setCenter(player->getSprite()->getPosition());
+    //
+    int position1 = player->getSprite()->getPosition().x;
+    if(position1 < 480)
+    {
+        position1 = 480;
+    }
+    if(position1 > 2770)
+    {
+        position1 = 2770;
+    }   
+
+    view.setCenter(position1,player->getSprite()->getPosition().y);
 
     window.setView(view);
+    
+    if(player->getAttack())
+    { 
+        player->createAttack(window.getView());
+    }
+
     if(player->getMethod() == 0)
     {
-        sf::Vector2f mousePos = (sf::Vector2f)sf::Mouse::getPosition();
-        sf::Vector2f playerPos = {960,540};
+        sf::Vector2f mousePos = ((sf::Vector2f)sf::Mouse::getPosition());
+        mousePos.x = mousePos.x / 2;
+        mousePos.y = mousePos.y / 2;
+        mousePos += view.getCenter();
+        mousePos.x -= 480;
+        mousePos.y -= 270;
+        //std::cout << mousePos.x << ", " << player->getX() << "\n";
+        //player->setX(player->getSprite()->getPosition().x);
+        //player->setY(player->getSprite()->getPosition().y);
+        //std::cout << mousePos.y << ", " << player->getY() << "\n";
+        //sf::Vector2f playerPos = {960,540};
+        sf::Vector2f playerPos = {player->getX(), player->getY()};
         sf::Vector2f difference = mousePos - playerPos;
         float hypotenuse = std::sqrt(std::pow(difference.x,2) + std::pow(difference.y,2));
         float angle = std::atan(difference.y/difference.x);
-        int multiplier = 1;
+        int multiplier = 1; 
         if(difference.x < 0)
         {
             multiplier = -1;
@@ -757,8 +791,14 @@ void Game::playLevel()
             sf::RectangleShape rect;
             rect.setSize(sf::Vector2f{66,16});
             rect.setFillColor(sf::Color::Red);
-            sf::Vector2f m = (sf::Vector2f) sf::Mouse::getPosition();
-            if(m.x > 960)
+            sf::Vector2f mousePos = ((sf::Vector2f)sf::Mouse::getPosition());
+            mousePos.x = mousePos.x / 2;
+            mousePos.y = mousePos.y / 2;
+            mousePos += view.getCenter();
+            mousePos.x -= 480;
+            mousePos.y -= 270;
+            sf::Vector2f playerPos = {player->getX(), player->getY()};
+            if(mousePos.x > playerPos.x)
             {
                 rect.setPosition(player->getSprite()->getGlobalBounds().left,player->getSprite()->getGlobalBounds().top);
             }
