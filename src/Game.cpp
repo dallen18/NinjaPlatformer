@@ -165,6 +165,8 @@ void Game::run()
                 player->getSprite()->setTextureRect(
                     sf::IntRect(0, 0, rect.width, rect.height));
                     }
+                } else{
+
                 }
 
             if(sf::Keyboard::isKeyPressed(sf::Keyboard::D))
@@ -351,16 +353,16 @@ void Game::setLevel(std::string filename)
 
     sf::View view(sf::FloatRect(0.0f,0.0f,1920.0f,1080.0f));
 
-    view.zoom(0.75f);
+    //view.zoom(0.25f);
 
     window.setView(view);
 
     //allocates memory for player since there is no default constructor that allows global variable otherwise
     if(player == NULL)
     {
-        player = new Player(&textures["PlayerIdle"], 6.0f, 12.0f, 1.0f, 16, 16);  //instantiates player. passes player textures, max x-axis speed, max y-axis speed, and acceleration rate
+        player = new Player(&textures["PlayerIdle"], 6.0f, 12.0f, 1.0f, 24, 31);  //instantiates player. passes player textures, max x-axis speed, max y-axis speed, and acceleration rate
     }
-
+   
     player->setHealth(5);
 
     //get info from xml files
@@ -395,7 +397,7 @@ void Game::setLevel(std::string filename)
     element = level.RootElement()->FirstChildElement("objectgroup")->NextSibling()->FirstChild();
     while(element != NULL)
     {
-        Enemy *enemy = new Enemy(&textures["EnemyBugIdle"],3.0f,4.0f,1.0f,16,16);
+        Enemy *enemy = new Enemy(&textures["EnemyBugIdle"],3.0f,4.0f,1.0f,23,29);
         enemy->getSprite()->setPosition(std::stoi(element->ToElement()->Attribute("x")),std::stoi(element->ToElement()->Attribute("y")));
         entities.push_back(enemy);
         element = element->NextSibling();
