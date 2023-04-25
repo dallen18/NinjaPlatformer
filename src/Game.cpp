@@ -11,7 +11,9 @@
 
 Game::Game()
 {
-    initWindow();
+    //Come back
+    player = NULL;
+    initWindow(); 
 
     loadTextures();
 
@@ -27,7 +29,7 @@ Game::~Game()
 void Game::initWindow()
 {
     //sets default size for window, creates title, and sets style to fullscreen
-    window.create(sf::VideoMode(1920,1080), "Ninja Platofmrer",sf::Style::Fullscreen);
+    window.create(sf::VideoMode(1920, 1080), "Ninja Platformer");
 
     //syncs frames with refresh rate of monitor
     window.setVerticalSyncEnabled(true);
@@ -40,24 +42,52 @@ void Game::initWindow()
 void Game::loadTextures()
 {
     //load player textures
-    sf::Texture playerTexture;
+    sf::Texture playerIdleTexture;
+    sf::Texture playerLeftRunTexture;
+    sf::Texture playerJumpTexture;
+    sf::Texture playerRunTexture;
 
-    if(!playerTexture.loadFromFile("resources/Images/Adam.jpg")) //takes texture from resources folder
+    if(!playerIdleTexture.loadFromFile("/Users/deontaeallen/MostRecent/NinjaPlatformer/resources/Images/Player/idle.png")) //takes texture from resources folder
     {
         std::cout << "failed to load image.";
     }
 
+    if(!playerRunTexture.loadFromFile("/Users/deontaeallen/MostRecent/NinjaPlatformer/resources/Images/Player/run_2.png")) //takes texture from resources folder
+    {
+        std::cout << "failed to load image.";
+    }
+
+    if(!playerLeftRunTexture.loadFromFile("/Users/deontaeallen/MostRecent/NinjaPlatformer/resources/Images/Player/left_run_1.png")) //takes texture from resources folder
+    {
+        std::cout << "failed to load image.";
+    }
+
+     if(!playerJumpTexture.loadFromFile("/Users/deontaeallen/MostRecent/NinjaPlatformer/resources/Images/Player/jump_1.png")) //takes texture from resources folder
+    {
+        std::cout << "failed to load image.";
+    }
+
+
+
+
+
+
+
+
+
+
+
     sf::Texture heartTexture;
 
-    if(!heartTexture.loadFromFile("resources/Images/heart-icon.png")) //takes texture from resources folder
+    if(!heartTexture.loadFromFile("/Users/deontaeallen/MostRecent/NinjaPlatformer/resources/Images/heart-icon.png")) //takes texture from resources folder
     {
         std::cout << "failed to load image.";
     }
 
     //load enemy textures
-    sf::Texture enemyTexture;
+    sf::Texture EnemyBugIdle;
 
-    if(!enemyTexture.loadFromFile("resources/Images/Adam.jpg")) //takes texture from resources folder
+    if(!EnemyBugIdle.loadFromFile("/Users/deontaeallen/MostRecent/NinjaPlatformer/resources/Images/Enemies/bug/fly.png")) //takes texture from resources folder
     {
         std::cout << "failed to load image.";
     }
@@ -65,19 +95,22 @@ void Game::loadTextures()
     //load block textures
     sf::Texture blockTexture;
 
-    if(!blockTexture.loadFromFile("resources/Images/cavesofgallet.png")) //takes texture from resources folder
+    if(!blockTexture.loadFromFile("/Users/deontaeallen/MostRecent/NinjaPlatformer/resources/Images/cavesofgallet.png")) //takes texture from resources folder
     {
         std::cout << "failed to load image.";
     }
     
     //inserts textures into map
-    textures["Player"] = playerTexture;
+    textures["PlayerIdle"] = playerIdleTexture;
+    textures["PlayerLeftRun"] = playerLeftRunTexture;
+    textures["PlayerJump"] = playerJumpTexture;
+    textures["PlayerRun"] = playerRunTexture;
     textures["Heart"] = heartTexture;
-    textures["Enemy"] = enemyTexture;
+    textures["Enemy"] = EnemyBugIdle;
     textures["Block"] = blockTexture;
 
     //loads font
-    if(!font.loadFromFile("resources/Fonts/Roboto-Black.ttf"))
+    if(!font.loadFromFile("/Users/deontaeallen/MostRecent/NinjaPlatformer/resources/Fonts/Roboto-Black.ttf")) 
     {
         std::cout << "failed to load font";
     }
@@ -109,21 +142,71 @@ void Game::run()
 
         if(player != NULL)
         {
-            if((*pressed)["Right"]) //right
-            {
-                player->setRight(true);
+            // if((*pressed)["Right"]) //right
+            // {
+            //     player->setRight(true);
+            // }
+
+            // if((*pressed)["Left"])
+            // {
+            //     player->setLeft(true);
+            // }
+            
+            // if((*pressed)["Jump"])
+            // {
+            //     player->setJumping(true);
+            // }
+
+            auto rect = player->getSprite()->getTextureRect();
+
+            if (event.type == sf::Event::KeyReleased) {
+                auto keyCode = event.key.code;
+                if (keyCode == sf::Keyboard::D || keyCode == sf::Keyboard::A || keyCode == sf::Keyboard::W  || keyCode == sf::Keyboard::Space) {
+                player->getSprite()->setTextureRect(
+                    sf::IntRect(0, 0, rect.width, rect.height));
+                    }
+                }
+
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+                {
+                    player->setRight(true);
+                }
+
+            
+
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+                {
+                    player->setLeft(true); 
+                }
+
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+                {
+                    player->setJumping(true);
+                }
+ 
+
+        if (player->getRight() || player->getLeft()) {
+            auto posX = player->getSprite()->getPosition().x;
+            auto textureIndex = static_cast<int>(posX) / 50 % 8;
+            textureIndex *= rect.width;
+
+            if (player->getRight()) {
+            player->getSprite()->setTexture(textures["PlayerRun"]);
             }
 
-            if((*pressed)["Left"])
-            {
-                player->setLeft(true);
+            if (player->getLeft()) {
+            player->getSprite()->setTexture(textures["PlayerLeftRun"]);
             }
-            
-            if((*pressed)["Jump"])
-            {
-                player->setJumping(true);
+
+            if (player->getJumping()) {
+            player->getSprite()->setTexture(textures["PlayerJump"]);
             }
-        } 
+
+            player->getSprite()->setTextureRect(
+                sf::IntRect(textureIndex, 0, rect.width, rect.height));
+            }
+        }
+
         
         switch(state)
         {
@@ -147,7 +230,7 @@ void Game::run()
             case PLAYING:
                 if(!createdState[PLAYING])
                 {
-                    setLevel("resources/Levels/NinjaLevelOne.tmx");
+                    setLevel("/Users/deontaeallen/MostRecent/NinjaPlatformer/resources/Levels/NinjaLevelOne.tmx");
                     createdState[savedState] = false;
                     createdState[PLAYING] = true;
                 }
@@ -182,9 +265,11 @@ void Game::mainMenu()
 
     menu.draw(&window);
 
+
     if(input->checkOtherInput(sf::Mouse::Left, 1))
     {
         std::string id = mouseCollision();
+        
         if(id == "startBtn")
         {
             createdState[state] = false;
@@ -266,14 +351,14 @@ void Game::setLevel(std::string filename)
 
     sf::View view(sf::FloatRect(0.0f,0.0f,1920.0f,1080.0f));
 
-    //view.zoom(0.25f);
+    view.zoom(0.75f);
 
     window.setView(view);
 
     //allocates memory for player since there is no default constructor that allows global variable otherwise
     if(player == NULL)
     {
-        player = new Player(&textures["Player"], 6.0f, 12.0f, 1.0f, 16, 16);  //instantiates player. passes player textures, max x-axis speed, max y-axis speed, and acceleration rate
+        player = new Player(&textures["PlayerIdle"], 6.0f, 12.0f, 1.0f, 16, 16);  //instantiates player. passes player textures, max x-axis speed, max y-axis speed, and acceleration rate
     }
 
     player->setHealth(5);
@@ -284,8 +369,9 @@ void Game::setLevel(std::string filename)
     level.LoadFile(filename.c_str());
 
     // the source image isn't taken as of now from the .tsx file but will be in the future if we add more tile sets
-    std::string source = "resources/Levels/";
-    source += level.RootElement()->FirstChild()->ToElement()->Attribute("source");
+    
+    std::string source = "/Users/deontaeallen/MostRecent/NinjaPlatformer/resources/Levels/cavesofgallet.tsx";
+    //source += level.RootElement()->FirstChild()->ToElement()->Attribute("source");
     tinyxml2::XMLDocument sheet;
     sheet.LoadFile(source.c_str());
 
@@ -309,7 +395,7 @@ void Game::setLevel(std::string filename)
     element = level.RootElement()->FirstChildElement("objectgroup")->NextSibling()->FirstChild();
     while(element != NULL)
     {
-        Enemy *enemy = new Enemy(&textures["Player"],3.0f,4.0f,1.0f,16,16);
+        Enemy *enemy = new Enemy(&textures["EnemyBugIdle"],3.0f,4.0f,1.0f,16,16);
         enemy->getSprite()->setPosition(std::stoi(element->ToElement()->Attribute("x")),std::stoi(element->ToElement()->Attribute("y")));
         entities.push_back(enemy);
         element = element->NextSibling();
@@ -322,15 +408,17 @@ void Game::setLevel(std::string filename)
     int i = 0;
     int x = 0;
     int y = 0;
-    std::vector<long> line;
+    //std::vector<long> line;
     std::string num;
+    long long val = 0;
     while(c != '\0')
     {
         if(c == ',')
         {
-            line.push_back(std::stol(num));
+            //line.push_back(std::stol(num));
+            val = std::stoll(num);
             num.clear();
-            long val = line.back();
+            //long val = line.back();
             sf::Vector2f scale(1.0f,1.0f);
             if(val > 0x80000000)
             {
@@ -649,11 +737,15 @@ bool Game::checkCollision(sf::Rect<float> a, sf::Rect<float> b)
 std::string Game::mouseCollision()
 {
     //collision with buttons
+    //sf::Vector2f mousePos = (sf::Vector2f)sf::Mouse::getPosition();
     sf::Vector2f mousePos = window.getView().getCenter() - window.getView().getSize() / 2.0f + (sf::Vector2f)sf::Mouse::getPosition();
+    mousePos.y -= 2022;
 
     sf::RectangleShape r(sf::Vector2f(1,1));
 
     r.setPosition(mousePos);
+
+   std::cout << mousePos.x  << "," << mousePos.y << "\n";
 
     for(int i = 0; i < buttons.size(); i++)
     {

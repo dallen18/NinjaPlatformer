@@ -146,6 +146,10 @@ void Player::decreaseHealth()
     }
 }
 
+///Finish later today
+//void Player::idle(bool b){
+//};
+
 /*
 Method is responsible for animating the player sprite. It uses the textures passed in the constructor.
 It should have different animation for when character is at a stand-still compared to when it is moving.

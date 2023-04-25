@@ -14,6 +14,8 @@ class Entity
         float accel;
         int xSize;
         int ySize;
+        int x;
+        int y;
 
     public:
         //getter methods
@@ -25,6 +27,8 @@ class Entity
         float getAccel();
         int getXSize();
         int getYSize();
+        int getX();
+        int getY();
 
         //setter methods
         void setXVel(float x);
@@ -35,6 +39,8 @@ class Entity
         void setXSize(int s);
         void setYSize(int s);
         void setTexture(sf::Texture *t);
+        void setX(int x);
+        void setY(int y);
 
         virtual std::string getClass();
 

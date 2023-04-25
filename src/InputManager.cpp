@@ -8,8 +8,9 @@ InputManager* InputManager::instancePtr = NULL;
 InputManager::InputManager()
 { 
     tinyxml2::XMLDocument doc;
+    std::cout << "hello";
     doc.LoadFile("resources/controls.xml");
-
+    
     if(!doc.Error())
     {   
         auto node = doc.RootElement()->FirstChild();

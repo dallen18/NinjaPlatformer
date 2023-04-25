@@ -35,6 +35,16 @@ int Entity::getXSize()
     return xSize;
 }
 
+int Entity::getX()
+{
+    return x;
+}
+
+int Entity::getY()
+{
+    return y;
+}
+
 int Entity::getYSize()
 {
     return ySize;
@@ -83,6 +93,16 @@ void Entity::setYSize(int s)
 void Entity::setTexture(sf::Texture *t)
 {
     texture = t;
+}
+
+void Entity::setX(int m)
+{
+    x = m;
+}
+
+void Entity::setY(int m)
+{
+    y = m;
 }
 
 void Entity::animation()

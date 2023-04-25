@@ -9,9 +9,7 @@ class Player : public Entity
 {
     private:
         bool contactBottom; 
-        
         int health;
-
         bool jump;
         bool right;
         bool left;
@@ -34,8 +32,9 @@ class Player : public Entity
         void setLeft(bool b);
         void setHealth(int h);
         void decreaseHealth();
-
         void move();
+        void idle();
+        void setAttack1(bool b);
 
         //other methods
         void animation();
