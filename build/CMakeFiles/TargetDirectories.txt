@@ -1,0 +1,3 @@
+/Users/deontaeallen/MostRecent/NinjaPlatformer/build/CMakeFiles/NinjaPlatformer.dir
+/Users/deontaeallen/MostRecent/NinjaPlatformer/build/CMakeFiles/edit_cache.dir
+/Users/deontaeallen/MostRecent/NinjaPlatformer/build/CMakeFiles/rebuild_cache.dir
