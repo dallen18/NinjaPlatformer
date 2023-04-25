@@ -14,7 +14,7 @@ class NPC : public Entity
         std::string message;
 
     public:
-        NPC(std::vector<sf::Texture> *textures, float xMax, float yMax, float accel, int xSize, int ySize, std::string m);
+        NPC(sf::Texture *texture, float xMax, float yMax, float accel, int xSize, int ySize, std::string m);
         ~NPC();
         std::string getString();
         std::string getClass();

@@ -10,10 +10,10 @@ Constructor of Player class. Takes the following Parameters:
     -float accel: sets acceleration rate for player
 
 */
-Enemy::Enemy(std::vector<sf::Texture> *textures, float xMax, float yMax, float accel, int xSize, int ySize)
+Enemy::Enemy(sf::Texture *texture, float xMax, float yMax, float accel, int xSize, int ySize, bool j)
 {   
-    setTextures(textures);
-    getSprite()->setTexture(textures->front()); //sets initial texture of sprite as the first texture in list
+    setTexture(texture);
+    getSprite()->setTexture(*texture); //sets initial texture of sprite as the first texture in list
     setXVel(0.0f);
     setYVel(0.0f);
     setXMax(xMax);
@@ -21,6 +21,9 @@ Enemy::Enemy(std::vector<sf::Texture> *textures, float xMax, float yMax, float a
     setAccel(accel);
     setXSize(xSize);
     setYSize(ySize);
+    getSprite()->setTextureRect(sf::IntRect(0,0,xSize,ySize));
+    setJumping(j);
+    setContactBottom(true);
 }
 
 Enemy::~Enemy()
@@ -33,6 +36,26 @@ std::string Enemy::getClass()
     return "Enemy";
 }
 
+bool Enemy::getContactBottom()
+{
+    return contactBottom;
+}
+
+bool Enemy::getJumping()
+{
+    return jumping;
+}
+
+void Enemy::setContactBottom(bool b)
+{
+    contactBottom = b;
+}
+
+void Enemy::setJumping(bool b)
+{
+    jumping = b;
+}
+
 void Enemy::move()
 {
     if(std::abs(getXVel()) < getXMax())
@@ -40,14 +63,22 @@ void Enemy::move()
         setXVel(getXVel() + getAccel());
     }
 
-    if(getYVel() < getYMax())
+    if(getContactBottom() && getJumping())
     {
-        int accel = getAccel();
-        if(accel < 0)
+        setYVel(-getYMax());
+        setContactBottom(false);
+    }
+    else
+    {
+        if(getYVel() < getYMax())
         {
-            accel *= -1;
+            int accel = getAccel();
+            if(accel < 0)
+            {
+                accel *= -1;
+            }
+            setYVel(getYVel() + accel); 
         }
-        setYVel(getYVel() + accel); 
     }
 }
 

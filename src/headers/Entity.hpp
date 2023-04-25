@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Graphics/Texture.hpp>
 
 #define _Entity
 
@@ -6,7 +7,7 @@ class Entity
 {
     private:
         sf::Sprite sprite;
-        std::vector<sf::Texture> *textures;
+        sf::Texture *texture;
         float xVel;
         float yVel;
         float xMax;
@@ -14,6 +15,8 @@ class Entity
         float accel;
         int xSize;
         int ySize;
+        float x;
+        float y;
 
     public:
         //getter methods
@@ -25,6 +28,9 @@ class Entity
         float getAccel();
         int getXSize();
         int getYSize();
+        sf::Texture *getTexture();
+        float getX();
+        float getY();
 
         //setter methods
         void setXVel(float x);
@@ -34,7 +40,9 @@ class Entity
         void setAccel(float a);
         void setXSize(int s);
         void setYSize(int s);
-        void setTextures(std::vector<sf::Texture> *t);
+        void setTexture(sf::Texture *t);
+        void setX(float v);
+        void setY(float v);
 
         virtual std::string getClass();
 

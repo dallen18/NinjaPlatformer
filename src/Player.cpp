@@ -1,5 +1,10 @@
 #include "headers/Player.hpp"
+#include <SFML/Graphics/Rect.hpp>
+#include <SFML/Graphics/View.hpp>
+#include <SFML/System/Vector2.hpp>
+#include <chrono>
 #include <iostream>
+#include <cmath>
 
 /*
 Constructor of Player class. Takes the following Parameters:
@@ -7,12 +12,12 @@ Constructor of Player class. Takes the following Parameters:
     -float xMax: sets max speed in the x-axis for player
     -float yMax: sets max speed in the y-axis for player
     -float accel: sets acceleration rate for player
-
 */
-Player::Player(std::vector<sf::Texture> *textures, float xMax, float yMax, float accel, int xSize, int ySize)
+Player::Player(sf::Texture *texture, float xMax, float yMax, float accel, int xSize, int ySize, int x, int y)
 {   
-    setTextures(textures);
-    getSprite()->setTexture(textures->front()); //sets initial texture of sprite as the first texture in list
+    setTexture(texture);
+    getSprite()->setTexture(*texture);
+    getSprite()->setTextureRect(sf::IntRect(0,0,xSize,ySize));
     setXVel(0.0f);
     setYVel(0.0f);
     setXMax(xMax);
@@ -20,11 +25,18 @@ Player::Player(std::vector<sf::Texture> *textures, float xMax, float yMax, float
     setAccel(accel);
     setXSize(xSize);
     setYSize(ySize);
+    //setX(x);
+    //setY(y);
 
     contactBottom = false;
     jump = false;
     right = false;
     left = false;
+}
+
+Player::~Player()
+{ 
+    //delete this;
 }
 
 void Player::move()
@@ -41,6 +53,7 @@ void Player::move()
         {
             xVel += accel;
         }
+        setRight(false);
     }
     else if(left) //left
     {
@@ -48,6 +61,7 @@ void Player::move()
         {
             xVel -= accel;
         }
+        setLeft(false);
     }
     else
     {
@@ -61,13 +75,8 @@ void Player::move()
         }
     }
 
-    if(getJumping()) //up
+    if(getJumping() && contactBottom) //up
     {
-        // if(yVel == 0 && getContactBottom())
-        // {
-        //     yVel = -yMax;
-        //     setContactBottom(false);
-        // }
         yVel = -yMax;
         setContactBottom(false);
         setJumping(false);
@@ -78,10 +87,87 @@ void Player::move()
         {
             yVel += accel;
         }
+        setContactBottom(false);
     }
 
     setXVel(xVel);
-    setYVel(yVel);
+    setYVel(yVel); 
+}
+
+void Player::createAttack(const sf::View &view)
+{
+    if(method == 0)
+    {
+        sf::Vector2f mousePos = (sf::Vector2f)sf::Mouse::getPosition();
+        //if()
+        int position1 = getSprite()->getPosition().x;
+        bool t = false;
+        if(position1 < 480)
+        {
+            //t = true;
+        }
+        if(position1 > 2770)
+        {
+            //t = true;
+        }
+        mousePos.x = mousePos.x / 2;
+        mousePos.y = mousePos.y / 2;
+
+        if(!t)
+        {
+            mousePos += view.getCenter();
+            std::cout << view.getCenter().x << "\n";
+        }
+        else
+        {
+            mousePos += sf::Vector2f{getX(),getY()};
+        }
+        mousePos.x -= 480;
+        mousePos.y -= 270;
+
+        sf::Vector2f playerPos = {getX(),getY()};
+        //std::cout << playerPos.x << ", " << playerPos.y <<"\n";
+        //std::cout << mousePos.x << ", " << mousePos.y << "\n";
+        sf::Vector2f difference = mousePos - playerPos;
+        float hypotenuse = std::sqrt(std::pow(difference.x,2) + std::pow(difference.y,2));
+        float velX = 10 * difference.x / hypotenuse;
+        float velY = 10 * difference.y / hypotenuse;
+        if(num > 0)
+        {
+            shurikens.push_back(new Projectile(getTexture(), velX, velY, getX(), getY()));
+            num -= 1;
+        }
+        setAttack(false);
+    }
+}
+
+int Player::getMethod()
+{
+    return method;
+}
+
+void Player::setMethod(int i)
+{
+    method = i;
+}
+
+std::vector<Projectile*> *Player::getShurikens()
+{
+    return &shurikens;
+}
+
+bool Player::getAttack()
+{
+    if(attack)
+    {
+        auto curr = std::chrono::steady_clock::now();
+        std::chrono::duration<double> elapsed = curr - time;
+        if(elapsed.count() > .5)
+        {
+            setAttack(false);
+        }
+    }
+    return attack;
 }
 
 bool Player::getContactBottom()
@@ -107,6 +193,15 @@ bool Player::getLeft()
 int Player::getHealth()
 {
     return health;
+}
+
+void Player::setAttack(bool b)
+{
+    if(b)
+    {
+        time = std::chrono::steady_clock::now();
+    }
+    attack = b;
 }
 
 void Player::setJumping(bool b)

@@ -1,10 +1,10 @@
 #include "headers/NPC.hpp"
 #include <iostream>
 
-NPC::NPC(std::vector<sf::Texture> *textures, float xMax, float yMax, float accel, int xSize, int ySize, std::string m)
+NPC::NPC(sf::Texture *texture, float xMax, float yMax, float accel, int xSize, int ySize, std::string m)
 {
-    setTextures(textures);
-    getSprite()->setTexture(textures->front()); //sets initial texture of sprite as the first texture in list
+    setTexture(texture);
+    getSprite()->setTexture(*texture); //sets initial texture of sprite as the first texture in list
     setXVel(0.0f);
     setYVel(0.0f);
     setXMax(xMax);
@@ -12,6 +12,15 @@ NPC::NPC(std::vector<sf::Texture> *textures, float xMax, float yMax, float accel
     setAccel(accel);
     setXSize(xSize);
     setYSize(ySize);
+
+    int line = 10;
+    std::string word;
+    std::string sentence;
+
+    for(int i = 0; i < m.size(); i++)
+    {
+
+    }
 
     int a = 0, b = 0;
     char c = m[0];
