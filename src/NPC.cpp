@@ -12,6 +12,15 @@ NPC::NPC(sf::Texture *texture, float xMax, float yMax, float accel, int xSize, i
     setXSize(xSize);
     setYSize(ySize);
 
+    int line = 10;
+    std::string word;
+    std::string sentence;
+
+    for(int i = 0; i < m.size(); i++)
+    {
+
+    }
+
     for(int i = 1; i < m.size() + 1; i++)
     {
         message.push_back(m.at(i - 1));
