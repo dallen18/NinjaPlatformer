@@ -364,7 +364,7 @@ void Game::setLevel(std::string filename)
     int y = 0;
     //std::vector<long> line;
     std::string num;
-    long long val = 0;
+    //long long val = 0;
     long long val = 0;
     while(c != '\0')
     {
