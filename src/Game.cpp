@@ -55,7 +55,7 @@ void Game::loadTextures()
         std::cout << "failed to load image.";
     }
 
-    if(!playerRunTexture.loadFromFile("resources/Images/Player/run_2.png")) //takes texture from resources folder
+    if(!playerRunTexture.loadFromFile("resources/Images/Player/run_1.png")) //takes texture from resources folder
     {
         std::cout << "failed to load image.";
     }
@@ -69,16 +69,6 @@ void Game::loadTextures()
     {
         std::cout << "failed to load image.";
     }
-
-
-
-
-
-
-
-
-
-
 
     sf::Texture heartTexture;
 
@@ -145,54 +135,91 @@ void Game::run()
 
         if(player != NULL)
         {
-            // if((*pressed)["Right"]) //right
-            // {
-            //     player->setRight(true);
-            // }
-
-            // if((*pressed)["Left"])
-            // {
-            //     player->setLeft(true);
-            // }
-            
-            // if((*pressed)["Jump"])
-            // {
-            //     player->setJumping(true);
-            // }
 
             auto rect = player->getSprite()->getTextureRect();
+            if((*pressed)["Right"]) //right
+            {
+                player->setRight(true);
+                player->getSprite()->setTextureRect(sf::IntRect(0, 0, rect.width, rect.height));
+            }
 
-            if (event.type == sf::Event::KeyReleased) {
-                auto keyCode = event.key.code;
-                if (keyCode == sf::Keyboard::D || keyCode == sf::Keyboard::A || keyCode == sf::Keyboard::W  || keyCode == sf::Keyboard::Space) {
-                player->getSprite()->setTextureRect(
-                    sf::IntRect(0, 0, rect.width, rect.height));
-                    }
-                } else{
+            if((*pressed)["Left"])
+            {
+                player->setLeft(true);
+                player->getSprite()->setTextureRect(sf::IntRect(0, 0, rect.width, rect.height));
+            }
 
-                }
+            if((*pressed)["Jump"])
+            {
+                player->setJumping(true);
+                player->getSprite()->setTextureRect(sf::IntRect(0, 0, rect.width, rect.height));
+            }
 
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+            if((*pressed)["Attack"])
+            {
+                player->setAttack(true);
+            }
+
+            if((*pressed)["Switch"])
+            {
+                if(player->getMethod() == 0)
                 {
-                    player->setRight(true);
+                    player->setMethod(1);
                 }
-
-            
-
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+                else
                 {
-                    player->setLeft(true); 
-                }
+                    player->setMethod(0);
+                }    
+            } 
 
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
-                {
-                    player->setJumping(true);
-                }
+            // if (event.type == sf::Event::KeyReleased) {
+            //     auto keyCode = event.key.code;
+            //     if (keyCode == sf::Keyboard::D || keyCode == sf::Keyboard::A || keyCode == sf::Keyboard::W  || keyCode == sf::Keyboard::Space) {
+            //     player->getSprite()->setTextureRect(
+            //         sf::IntRect(0, 0, rect.width, rect.height));
+            //         }
+            //     } else{
+
+            //     }
+
+            // if(sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+            //     {
+            //         player->setRight(true);
+            //     }
+
+            // 
+
+            // if(sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+            //     {
+            //         player->setLeft(true); 
+            //     }
+
+            // if(sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+            //     {
+            //         player->setJumping(true);
+            //     }
+
+            // if(sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
+            // {
+            //     if(player->getMethod() == 0)
+            //     {
+            //         player->setMethod(1);
+            //     }
+            //     else
+            //     {
+            //         player->setMethod(0);
+            //     }
+            // }
+
+            // if(sf::Mouse::isButtonPressed(sf::Mouse::Left))
+            // {
+            //     player->setAttack(true);
+            // }
  
 
         if (player->getRight() || player->getLeft()) {
             auto posX = player->getSprite()->getPosition().x;
-            auto textureIndex = static_cast<int>(posX) / 50 % 8;
+            auto textureIndex = static_cast<int>(posX) / 50 % 4;
             textureIndex *= rect.width;
 
             if (player->getRight()) {
@@ -996,7 +1023,7 @@ std::string Game::mouseCollision()
     //collision with buttons
     //sf::Vector2f mousePos = (sf::Vector2f)sf::Mouse::getPosition();
     sf::Vector2f mousePos = window.getView().getCenter() - window.getView().getSize() / 2.0f + (sf::Vector2f)sf::Mouse::getPosition();
-    mousePos.y -= 2022;
+    //mousePos.y -= 2022;
 
     sf::RectangleShape r(sf::Vector2f(1,1));
 
