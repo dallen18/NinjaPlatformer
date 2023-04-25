@@ -14,6 +14,7 @@
 
 Game::Game()
 {
+    player = NULL;
     initWindow();
 
     loadTextures();
@@ -72,7 +73,8 @@ void Game::loadTextures()
     {
         std::cout << "failed to load image.";
     }
-    
+
+
     //inserts textures into map
     textures["Player"] = playerTexture;
     textures["Heart"] = heartTexture;
@@ -92,9 +94,7 @@ void Game::run()
     //sets initial state of game at main menu
     state = MAIN_MENU;
     savedState = state;
-
     input = InputManager::getInstance();
-
     while (window.isOpen())
     {
         sf::Event event;
@@ -104,6 +104,7 @@ void Game::run()
             if (event.type == sf::Event::Closed)
             {
                 window.close();
+                std:: cout <<"a";
             }
         }
 
@@ -309,7 +310,6 @@ void Game::setLevel(std::string filename)
     view.zoom(0.5f);
 
     window.setView(view);
-
     //allocates memory for player since there is no default constructor that allows global variable otherwise
     if(player == NULL)
     {
@@ -317,9 +317,9 @@ void Game::setLevel(std::string filename)
         player->setHealth(5);
     }
 
+ 
 
     //get info from xml files
-    
     tinyxml2::XMLDocument level;
     level.LoadFile(filename.c_str());
 
@@ -337,12 +337,9 @@ void Game::setLevel(std::string filename)
 
     int blockWidth = std::stoi(level.RootElement()->Attribute("tilewidth"));
     int blockHeight = std::stoi(level.RootElement()->Attribute("tileheight"));
-
     sf::Vector2f playerPosition;
     std::vector<sf::Vector2f> enemyPositions;
-
     auto element = level.RootElement()->FirstChildElement("objectgroup")->FirstChild();
-
     sf::Sprite *playerSprite = player->getSprite();
     int xc = std::stoi(element->ToElement()->Attribute("x"));
     int yc = std::stoi(element->ToElement()->Attribute("y"));
@@ -359,16 +356,15 @@ void Game::setLevel(std::string filename)
         entities.push_back(enemy);
         element = element->NextSibling();
     }
-
     // parse data to create blocks and rotate them
     std::string d = level.RootElement()->FirstChildElement("layer")->FirstChildElement()->GetText();
-    
     char c = d[1];
     int i = 0;
     int x = 0;
     int y = 0;
-    std::vector<long> line;
+    //std::vector<long> line;
     std::string num;
+    long long val = 0;
     long long val = 0;
     while(c != '\0')
     {
