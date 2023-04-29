@@ -3,11 +3,12 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <vector>
+#include <memory>
 
 class ActiveSounds
 {
     private:
-        std::vector<sf::Sound *> sounds;
+        std::vector<std::unique_ptr<sf::Sound>> sounds;
 
     public:
         ActiveSounds();
