@@ -1,6 +1,7 @@
 #include "headers/Game.hpp"
 #include "headers/Hud.hpp"
 #include "headers/tinyxml2.h"
+#include <SFML/Audio/SoundBuffer.hpp>
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/System/Vector2.hpp>
@@ -15,9 +16,12 @@
 Game::Game()
 {
     player = NULL;
+
     initWindow();
 
     loadTextures();
+
+    loadSounds();
 
     run();
 }
@@ -110,6 +114,18 @@ void Game::loadTextures()
     }
 }
 
+void Game::loadSounds()
+{
+    sf::SoundBuffer enemyHit;
+
+    if(!enemyHit.loadFromFile("resources/Audio/creature_hit.wav"))
+    {
+        std::cout << "failed to load enemy hit sound\n";
+    }
+
+    sounds["EnemyHit"] = enemyHit;
+}
+
 //runs the game loop
 void Game::run()
 {
@@ -140,19 +156,22 @@ void Game::run()
             if((*pressed)["Right"]) //right
             {
                 player->setRight(true);
-                player->getSprite()->setTextureRect(sf::IntRect(0, 0, rect.width, rect.height));
+                //player->getSprite()->setTextureRect(sf::IntRect(0, 0, rect.width, rect.height));
+                player->getSprite()->setTexture(textures["PlayerRun"]);
             }
 
             if((*pressed)["Left"])
             {
                 player->setLeft(true);
-                player->getSprite()->setTextureRect(sf::IntRect(0, 0, rect.width, rect.height));
+                //player->getSprite()->setTextureRect(sf::IntRect(0, 0, rect.width, rect.height));
+                player->getSprite()->setTexture(textures["PlayerLeftRun"]);
             }
 
             if((*pressed)["Jump"])
             {
                 player->setJumping(true);
-                player->getSprite()->setTextureRect(sf::IntRect(0, 0, rect.width, rect.height));
+                //player->getSprite()->setTextureRect(sf::IntRect(0, 0, rect.width, rect.height));
+                player->getSprite()->setTexture(textures["PlayerJump"]);
             }
 
             if((*pressed)["Attack"])
@@ -172,52 +191,7 @@ void Game::run()
                 }    
             } 
 
-            // if (event.type == sf::Event::KeyReleased) {
-            //     auto keyCode = event.key.code;
-            //     if (keyCode == sf::Keyboard::D || keyCode == sf::Keyboard::A || keyCode == sf::Keyboard::W  || keyCode == sf::Keyboard::Space) {
-            //     player->getSprite()->setTextureRect(
-            //         sf::IntRect(0, 0, rect.width, rect.height));
-            //         }
-            //     } else{
-
-            //     }
-
-            // if(sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-            //     {
-            //         player->setRight(true);
-            //     }
-
-            // 
-
-            // if(sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-            //     {
-            //         player->setLeft(true); 
-            //     }
-
-            // if(sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
-            //     {
-            //         player->setJumping(true);
-            //     }
-
-            // if(sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
-            // {
-            //     if(player->getMethod() == 0)
-            //     {
-            //         player->setMethod(1);
-            //     }
-            //     else
-            //     {
-            //         player->setMethod(0);
-            //     }
-            // }
-
-            // if(sf::Mouse::isButtonPressed(sf::Mouse::Left))
-            // {
-            //     player->setAttack(true);
-            // }
- 
-
-        if (player->getRight() || player->getLeft()) {
+            if (player->getRight() || player->getLeft()) {
             auto posX = player->getSprite()->getPosition().x;
             auto textureIndex = static_cast<int>(posX) / 50 % 4;
             textureIndex *= rect.width;
@@ -333,10 +307,6 @@ void Game::pauseMenu()
 {
     window.clear();
 
-    // sf::View vie(sf::FloatRect(0.0f,0.0f,1920.0f,1080.0f));
-    // vie.setCenter(player->getSprite()->getPosition());
-    // vie.zoom(0.5f);
-    // window.setView(vie);
     sf::View vie(sf::FloatRect(0.0f,0.0f, 1920.0f, 1080.0f));
     vie.zoom(0.5f);
     int position1 = player->getSprite()->getPosition().x;
@@ -344,10 +314,6 @@ void Game::pauseMenu()
     {
         position1 = 480;
     }
-    if(position1 > 2770)
-    {
-        position1 = 2770;
-    }   
 
     vie.setCenter(position1,player->getSprite()->getPosition().y);
 
@@ -423,7 +389,7 @@ void Game::setLevel(std::string filename)
     //allocates memory for player since there is no default constructor that allows global variable otherwise
     if(player == NULL)
     {
-        player = new Player(&textures["PlayerIdle"], 6.0f, 12.0f, 1.0f, 24, 31, 0, 0);  //instantiates player. passes player textures, max x-axis speed, max y-axis speed, and acceleration rate
+        player = new Player(&textures["PlayerIdle"], 6.0f, 14.0f, 1.0f, 24, 31, 0, 0);  //instantiates player. passes player textures, max x-axis speed, max y-axis speed, and acceleration rate
         player->setHealth(5);
     }
 
@@ -462,7 +428,8 @@ void Game::setLevel(std::string filename)
     element = level.RootElement()->FirstChildElement("objectgroup")->NextSibling()->FirstChild();
     while(element != NULL)
     {
-        Enemy *enemy = new Enemy(&textures["EnemyBugIdle"],1.0f,10.0f,1.0f,16,16,true);
+        bool jump = std::stoi(element->ToElement()->Attribute("width"))==17;
+        Enemy *enemy = new Enemy(&textures["Enemy"],2.0f,8.0f,1.0f,35,35,jump);
         enemy->getSprite()->setPosition(std::stoi(element->ToElement()->Attribute("x")),std::stoi(element->ToElement()->Attribute("y")));
         entities.push_back(enemy);
         element = element->NextSibling();
@@ -532,6 +499,8 @@ void Game::playLevel()
 {
     window.clear();
 
+    activeSounds.checkSounds();
+
     if(input->checkOtherInput(sf::Keyboard::Escape, 0))
     {
         savedState = state;
@@ -596,11 +565,14 @@ void Game::playLevel()
             Entity *entity = entities.at(l);
             b.left = entity->getSprite()->getPosition().x;
             b.top = entity->getSprite()->getPosition().y;
+            b.width = 35;
+            b.height = 35;
             if(entity->getClass() == "Enemy")
             {
                 bool c = checkCollision(a, b);
                 if(c)
-                {
+                { 
+                    activeSounds.addSound(&sounds["EnemyHit"]);
                     entities.erase(entities.begin() + l);
                     enemyCheck = true;
                     break;
@@ -706,6 +678,7 @@ void Game::playLevel()
         {
             if(entity->getClass() == "Enemy")
             {
+                activeSounds.addSound(&sounds["EnemyHit"]);
                 player->decreaseHealth();
                 if(player->getHealth() == 0)
                 {
@@ -846,12 +819,8 @@ void Game::playLevel()
     {
         position1 = 480;
     }
-    if(position1 > 2770)
-    {
-        position1 = 2770;
-    }   
 
-    view.setCenter(position1,player->getSprite()->getPosition().y);
+    view.setCenter(position1,240);
 
     window.setView(view);
     
@@ -868,11 +837,6 @@ void Game::playLevel()
         mousePos += view.getCenter();
         mousePos.x -= 480;
         mousePos.y -= 270;
-        //std::cout << mousePos.x << ", " << player->getX() << "\n";
-        //player->setX(player->getSprite()->getPosition().x);
-        //player->setY(player->getSprite()->getPosition().y);
-        //std::cout << mousePos.y << ", " << player->getY() << "\n";
-        //sf::Vector2f playerPos = {960,540};
         sf::Vector2f playerPos = {player->getX(), player->getY()};
         sf::Vector2f difference = mousePos - playerPos;
         float hypotenuse = std::sqrt(std::pow(difference.x,2) + std::pow(difference.y,2));
@@ -883,8 +847,8 @@ void Game::playLevel()
             multiplier = -1;
         }
         sf::Vector2f pointerPos;
-        pointerPos.x = multiplier * 100 * std::cos(angle) + player->getSprite()->getGlobalBounds().left;
-        pointerPos.y = multiplier * 100 * std::sin(angle) + player->getSprite()->getGlobalBounds().top;
+        pointerPos.x = multiplier * 50 * std::cos(angle) + player->getSprite()->getGlobalBounds().left + 6;
+        pointerPos.y = multiplier * 50 * std::sin(angle) + player->getSprite()->getGlobalBounds().top;
         sf::RectangleShape rectangle;
         rectangle.setSize(sf::Vector2f{10,10});
         rectangle.setFillColor(sf::Color::Red);

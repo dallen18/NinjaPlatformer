@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/System/Clock.hpp>
+#include <SFML/Audio.hpp>
 #include <iostream>
 #include <stdarg.h>
 #include <vector>
@@ -17,6 +18,7 @@
 #include "Hud.hpp"
 #include "InputManager.hpp"
 #include "tinyxml2.h"
+#include "Sound.hpp"
 
 const int SCREEN_FPS = 60;
 const int SCREEN_TICKS_PER_FRAME = 1000 / SCREEN_FPS;
@@ -41,7 +43,9 @@ class Game
         bool createdState[sizeof(State)];
 
         //assets
-        std::map<std::string, sf::Texture> textures;
+        std::unordered_map<std::string, sf::Texture> textures;
+        std::unordered_map<std::string, sf::SoundBuffer> sounds;
+        ActiveSounds activeSounds;
         sf::Font font;
 
         //lists of interactable objecs
@@ -62,6 +66,7 @@ class Game
         //game set-up functions
         void initWindow();
         void loadTextures();
+        void loadSounds();
 
         //game loop
         void run();
