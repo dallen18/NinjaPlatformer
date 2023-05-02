@@ -42,7 +42,7 @@
     <property name="Starting Position" value=""/>
    </properties>
   </object>
-  <object id="22" name="background" x="1449.33" y="253.333"/>
+  <object id="22" name="NPC" x="259.997" y="329.333"/>
  </objectgroup>
  <objectgroup id="3" name="Object Layer 2">
   <object id="5" name="enemyPosition" class="1" x="1328" y="416.667" width="16" height="32">
