@@ -97,6 +97,24 @@ void Game::loadTextures()
         std::cout << "failed to load image.";
     }
 
+     sf::Texture backgroundTexture;
+
+    if(!backgroundTexture.loadFromFile("resources/Images/parallax-mountain-bg.png")) //takes texture from resources folder
+    {
+        std::cout << "failed to load image.";
+    }
+       sf::Texture backgroundTextureb;
+
+    if(!backgroundTextureb.loadFromFile("resources/Images/parallax-mountain-montain-far.png")) //takes texture from resources folder
+    {
+        std::cout << "failed to load image.";
+    }
+      sf::Texture backgroundTexturec;
+
+    if(!backgroundTexturec.loadFromFile("resources/Images/mountains - Copy.png")) //takes texture from resources folder
+    {
+        std::cout << "failed to load image.";
+    }
 
     //inserts textures into map
     textures["PlayerIdle"] = playerIdleTexture;
@@ -106,6 +124,9 @@ void Game::loadTextures()
     textures["Heart"] = heartTexture;
     textures["Enemy"] = EnemyBugIdle;
     textures["Block"] = blockTexture;
+    textures["Background"] = backgroundTexture;
+    textures["Backgroundb"] = backgroundTextureb;
+    textures["Backgroundc"] = backgroundTexturec;
 
     //loads font
     if(!font.loadFromFile("resources/Fonts/Roboto-Black.ttf")) 
@@ -212,7 +233,7 @@ void Game::run()
                 sf::IntRect(textureIndex, 0, rect.width, rect.height));
             }
         }
-
+        
         
         switch(state)
         {
@@ -508,6 +529,9 @@ void Game::playLevel()
     }
 
     player->move(); 
+
+    Background background(player,&textures["Background"],&textures["Backgroundb"],&textures["Backgroundc"]);
+    background.draw(&window);
 
     // check collision 
     sf::Rect<float> a, b;
@@ -819,8 +843,12 @@ void Game::playLevel()
     {
         position1 = 480;
     }
+    if(position1 > 3520)
+    {
+        position1 = 3520;
+    }
 
-    view.setCenter(position1,240);
+    view.setCenter(position1,270);
 
     window.setView(view);
     
@@ -933,7 +961,8 @@ void Game::playLevel()
     }
 
     sf::View vie(sf::FloatRect(0.0f,0.0f,1920.0f,1080.0f));
-    vie.setCenter(player->getSprite()->getPosition());
+    //vie.setCenter(player->getSprite()->getPosition());
+    vie.setCenter(player->getSprite()->getPosition().x,270);
     window.setView(vie);
  
     Hud hud(player, &textures["Heart"]);
