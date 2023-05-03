@@ -53,6 +53,32 @@ void Game::loadTextures()
     sf::Texture playerLeftRunTexture;
     sf::Texture playerJumpTexture;
     sf::Texture playerRunTexture;
+    sf::Texture shurikenTexture;
+    sf::Texture idleLeft;
+    sf::Texture npc;
+
+    //load textbox textures
+    sf::Texture textTexture;
+
+    if(!textTexture.loadFromFile("resources/Images/DialougeBOXES.png")) //takes texture from resources folder
+    {
+        std::cout << "failed to load image.";
+    }
+
+    if(npc.loadFromFile("resources/Images/ninja_merchant_anim_Animation_1_14.png"))
+    {
+        std::cout << "failed to load image.";
+    }
+
+    if(!idleLeft.loadFromFile("resources/Images/Player/left_idle.png")) //takes texture from resources folder
+    {
+        std::cout << "failed to load image.";
+    }
+
+    if(!shurikenTexture.loadFromFile("resources/Images/Player/shuriken_1.png")) //takes texture from resources folder
+    {
+        std::cout << "failed to load image.";
+    }
 
     if(!playerIdleTexture.loadFromFile("resources/Images/Player/idle.png")) //takes texture from resources folder
     {
@@ -127,6 +153,10 @@ void Game::loadTextures()
     textures["Background"] = backgroundTexture;
     textures["Backgroundb"] = backgroundTextureb;
     textures["Backgroundc"] = backgroundTexturec;
+    textures["IdleLeft"] = idleLeft;
+    textures["Shuriken"] = shurikenTexture;
+    textures["Text"] = textTexture;
+    textures["NPC"] = npc;
 
     //loads font
     if(!font.loadFromFile("resources/Fonts/Roboto-Black.ttf")) 
@@ -172,6 +202,17 @@ void Game::run()
 
         if(player != NULL)
         {
+            if(event.type == sf::Event::KeyReleased){
+                auto keyCode = event.key.code;
+                if(keyCode == sf::Keyboard::D){
+                    player->getSprite()->setTextureRect(sf::IntRect(0, 0, 23, 31));
+                    player->getSprite()->setTexture(textures["PlayerIdle"]);
+                }
+                if(keyCode == sf::Keyboard::A){
+                    player->getSprite()->setTextureRect(sf::IntRect(0, 0, 23, 31));
+                    player->getSprite()->setTexture(textures["IdleLeft"]);
+                }
+            }
 
             auto rect = player->getSprite()->getTextureRect();
             if((*pressed)["Right"]) //right
@@ -410,7 +451,7 @@ void Game::setLevel(std::string filename)
     //allocates memory for player since there is no default constructor that allows global variable otherwise
     if(player == NULL)
     {
-        player = new Player(&textures["PlayerIdle"], 6.0f, 14.0f, 1.0f, 24, 31, 0, 0);  //instantiates player. passes player textures, max x-axis speed, max y-axis speed, and acceleration rate
+        player = new Player(&textures["PlayerIdle"], &textures["Shuriken"], 6.0f, 14.0f, 1.0f, 24, 31, 0, 0);  //instantiates player. passes player textures, max x-axis speed, max y-axis speed, and acceleration rate
         player->setHealth(5);
     }
 
@@ -445,6 +486,16 @@ void Game::setLevel(std::string filename)
     playerSprite->setPosition(xc, yc);
     player->setX(xc);
     player->setY(yc);
+
+    element = element->NextSibling();
+    NPC* npc = new NPC(&textures["NPC"],1.0f,1.0f,1.0f,16,16,"Use D to run right and A to run left. Use Ctrl to switch to your sword!");
+    npc->getSprite()->setPosition(std::stoi(element->ToElement()->Attribute("x")),std::stoi(element->ToElement()->Attribute("y")));
+    entities.push_back(npc);
+
+    // element = element->NextSibling();
+    // NPC* npc2 = new NPC(&textures["EnemyBugIdle"],1.0f,1.0f,1.0f,16,16,"Congrats! You made it to the end.");
+    // npc2->getSprite()->setPosition(3910,250);
+    // entities.push_back(npc2);
 
     element = level.RootElement()->FirstChildElement("objectgroup")->NextSibling()->FirstChild();
     while(element != NULL)
@@ -728,11 +779,18 @@ void Game::playLevel()
                 t.setFillColor(sf::Color::Blue);
                 t.setPosition(entity->getSprite()->getPosition().x,entity->getSprite()->getPosition().y - str.size());
             
-                sf::RectangleShape background(sf::Vector2f(220,str.size() + 20));
+                // sf::RectangleShape background(sf::Vector2f(220,str.size() + 20));
 
-                background.setFillColor(sf::Color::White);
+                // background.setFillColor(sf::Color::White);
 
-                background.setPosition(t.getPosition().x - 10, t.getPosition().y - 10);
+                // background.setPosition(t.getPosition().x - 10, t.getPosition().y - 10);
+
+                sf::RectangleShape background(sf::Vector2f(220,str.size() + 40));
+
+                background.setTexture(&textures["Text"]);
+
+                t.setPosition(entity->getX() - 300,entity->getY() + 350);
+                background.setPosition(entity->getX() - 300, entity->getY() + 350);
 
                 window.draw(background);
                 
@@ -1022,7 +1080,7 @@ std::string Game::mouseCollision()
 
     r.setPosition(mousePos);
 
-   std::cout << mousePos.x  << "," << mousePos.y << "\n";
+   //std::cout << mousePos.x  << "," << mousePos.y << "\n";
 
     for(int i = 0; i < buttons.size(); i++)
     {

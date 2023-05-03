@@ -23,10 +23,11 @@ class Player : public Entity
         std::vector<Projectile*> shurikens;
         sf::RectangleShape rect;
         std::chrono::time_point<std::chrono::steady_clock> time;
+        sf::Texture *s;
 
     public:
         //constructor
-        Player(sf::Texture *texture, float xMax, float yMax, float accel, int xSize, int ySize, int x, int y);
+        Player(sf::Texture *texture, sf::Texture *s, float xMax, float yMax, float accel, int xSize, int ySize, int x, int y);
         ~Player();
         //getter methods
         bool getContactBottom();

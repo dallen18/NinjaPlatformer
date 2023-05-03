@@ -13,7 +13,7 @@ Constructor of Player class. Takes the following Parameters:
     -float yMax: sets max speed in the y-axis for player
     -float accel: sets acceleration rate for player
 */
-Player::Player(sf::Texture *texture, float xMax, float yMax, float accel, int xSize, int ySize, int x, int y)
+Player::Player(sf::Texture *texture, sf::Texture *s, float xMax, float yMax, float accel, int xSize, int ySize, int x, int y)
 {   
     setTexture(texture);
     getSprite()->setTexture(*texture);
@@ -25,6 +25,7 @@ Player::Player(sf::Texture *texture, float xMax, float yMax, float accel, int xS
     setAccel(accel);
     setXSize(xSize);
     setYSize(ySize);
+    this->s = s;
     //setX(x);
     //setY(y);
 
@@ -114,7 +115,7 @@ void Player::createAttack(const sf::View &view)
         float velY = 10 * difference.y / hypotenuse;
         if(num > 0)
         {
-            shurikens.push_back(new Projectile(getTexture(), velX, velY, getX(), getY()));
+            shurikens.push_back(new Projectile(s, velX, velY, getX(), getY()));
             num -= 1;
         }
         setAttack(false);
