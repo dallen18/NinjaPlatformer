@@ -15,7 +15,7 @@ Projectile::Projectile(sf::Texture *t, float xvel, float yvel, float x, float y)
     setYMax(10.0f);
     setTexture(t);
     getSprite()->setTexture(*t); 
-    getSprite()->setTextureRect(sf::IntRect(0,0,16,16));
+    getSprite()->setTextureRect(sf::IntRect(0,0,11,11));
     getSprite()->setPosition(x,y);
 }
 

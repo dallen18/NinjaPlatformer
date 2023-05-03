@@ -31,6 +31,11 @@ sf::Texture *Entity::getTexture()
     return texture;
 }
 
+// std::vector<sf::Texture*> Entity::getTextures()
+// {
+//     return textures;
+// }
+
 float Entity::getXVel()
 {
     return xVel;
@@ -110,11 +115,20 @@ void Entity::setTexture(sf::Texture *t)
 {
     texture = t;
 }
+// void Entity::setTextures(std::vector<sf::Texture*> _textures)
+// {
+//     textures = _textures;
+// }
 
-void Entity::animation()
-{
-    
-}
+//void setState(entityState state)
+
+//////////////////////////
+//void Entity::animation()
+
+//switch case for state, then create specific movements for player,NPC and enemy based on state
+
+void update();
+void render(sf::RenderTarget& render);
 
 void Entity::move()
 {

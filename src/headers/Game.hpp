@@ -44,6 +44,7 @@ class Game
 
         //assets
         std::unordered_map<std::string, sf::Texture> textures;
+        std::unordered_map<std::string, std::vector<sf::Texture>> p_textures;
         std::unordered_map<std::string, sf::SoundBuffer> sounds;
         ActiveSounds activeSounds;
         sf::Font font;
@@ -56,6 +57,12 @@ class Game
         std::vector<Button> buttons;
 
         Player *player;
+        
+
+        //Deontae's trouble shooting
+        Enemy *enemy;
+        Player *players;
+        void iPlayer();
 
         InputManager *input;
 
@@ -86,4 +93,11 @@ class Game
         //collision and movement
         std::string mouseCollision();
         bool checkCollision(sf::Rect<float> a, sf::Rect<float> b);
+
+        void updateEnemy();
+        void initEnemy();
+        void renderEnemy();
+        void updatePlayer();
+        void renderPlayer();
+
 };

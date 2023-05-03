@@ -18,7 +18,12 @@ Game::Game()
     player = NULL;
 
     initWindow();
-
+    ///////////////
+    this->initWindow();
+    this->initEnemy();
+    this->iPlayer();
+    
+    //////////////////
     loadTextures();
 
     loadSounds();
@@ -29,13 +34,36 @@ Game::Game()
 Game::~Game()
 {
     delete player;
+    delete this->enemy;
+    delete this->players;
 }
+//////////    Deontae
+void Game::updateEnemy(){
+    this->enemy->update();
+}
+
+void Game::updatePlayer(){
+    this->players->update();
+}
+
+void Game::renderEnemy(){
+    this->enemy->render(this->window);
+}
+
+void Game::renderPlayer(){
+    this->players->render(this->window);
+}
+
+void Game::iPlayer(){
+    this->players = new Player();
+}
+//////////////////
 
 //initializes window
 void Game::initWindow()
 {
     //sets default size for window, creates title, and sets style to fullscreen
-    window.create(sf::VideoMode(1920, 1080), "Ninja Platformer");
+    window.create(sf::VideoMode(1920, 1080), "Ninja Platformer", sf::Style::Fullscreen);
 
     //syncs frames with refresh rate of monitor
     window.setVerticalSyncEnabled(true);
@@ -53,8 +81,21 @@ void Game::loadTextures()
     sf::Texture playerLeftRunTexture;
     sf::Texture playerJumpTexture;
     sf::Texture playerRunTexture;
+    sf::Texture shurikenTexture;
+    sf::Texture playerLeftIdle;
+    sf::Texture AttackTexture;
+
+    if(!AttackTexture.loadFromFile("resources/Images/Player/attack_1.png")) //takes texture from resources folder
+    {
+        std::cout << "failed to load image.";
+    }
 
     if(!playerIdleTexture.loadFromFile("resources/Images/Player/idle.png")) //takes texture from resources folder
+    {
+        std::cout << "failed to load image.";
+    }
+
+    if(!playerLeftIdle.loadFromFile("resources/Images/Player/left_idle.png")) //takes texture from resources folder
     {
         std::cout << "failed to load image.";
     }
@@ -82,9 +123,27 @@ void Game::loadTextures()
     }
 
     //load enemy textures
-    sf::Texture EnemyBugIdle;
+    sf::Texture EnemyBugLeft;
+    sf::Texture EnemyBugRight;
+    sf::Texture EnemyBugDeath;
+    sf::Texture EnemyBugDeath_1;
 
-    if(!EnemyBugIdle.loadFromFile("resources/Images/Enemies/bug/fly.png")) //takes texture from resources folder
+    if(!EnemyBugLeft.loadFromFile("resources/Images/Enemies/bug/fly.png")) //takes texture from resources folder
+    {
+        std::cout << "failed to load image.";
+    }
+
+    if(!EnemyBugLeft.loadFromFile("resources/Images/Enemies/bug/fly.png")) //takes texture from resources folder
+    {
+        std::cout << "failed to load image.";
+    }
+
+    if(!EnemyBugDeath.loadFromFile("resources/Images/Enemies/bug/fly.png")) //takes texture from resources folder
+    {
+        std::cout << "failed to load image.";
+    }
+
+    if(!EnemyBugDeath_1.loadFromFile("resources/Images/Enemies/bug/fly.png")) //takes texture from resources folder
     {
         std::cout << "failed to load image.";
     }
@@ -96,15 +155,26 @@ void Game::loadTextures()
     {
         std::cout << "failed to load image.";
     }
+    ///load shuriken texture
 
+    if(!shurikenTexture.loadFromFile("resources/Images/Player/shuriken.png")) //takes texture from resources folder
+    {
+        std::cout << "failed to load image.";
+    }
 
     //inserts textures into map
+    textures["Attacks"] = AttackTexture;
+    textures["Shuriken"] = shurikenTexture;
     textures["PlayerIdle"] = playerIdleTexture;
+    textures["IdleLeft"] = playerLeftIdle;
     textures["PlayerLeftRun"] = playerLeftRunTexture;
     textures["PlayerJump"] = playerJumpTexture;
     textures["PlayerRun"] = playerRunTexture;
     textures["Heart"] = heartTexture;
-    textures["Enemy"] = EnemyBugIdle;
+    textures["Bug"] = EnemyBugLeft;
+    textures["Bug_1"] = EnemyBugRight;
+    textures["Bug_death"] = EnemyBugDeath;
+    textures["Bug_death_1"] = EnemyBugDeath_1;
     textures["Block"] = blockTexture;
 
     //loads font
@@ -133,6 +203,9 @@ void Game::run()
     state = MAIN_MENU;
     savedState = state;
     input = InputManager::getInstance();
+    //////////////////////////////
+    auto time  = std::chrono::steady_clock::now();
+
     while (window.isOpen())
     {
         sf::Event event;
@@ -145,13 +218,34 @@ void Game::run()
                 std:: cout <<"a";
             }
         }
-
+        //////////////////
+        float deltaTime;
+        {
+            const auto new_time = std::chrono::steady_clock::now();
+            deltaTime = std::chrono::duration<float>(new_time - time).count();
+            time = new_time;
+        }
         input->checkPlayerInput();
         auto pressed = input->getPressed();
 
         if(player != NULL)
         {
 
+            if(event.type == sf::Event::KeyReleased){   
+                auto keyCode = event.key.code;
+                if(keyCode == sf::Keyboard::D){
+                    player->getSprite()->setTextureRect(sf::IntRect(0, 0, 23, 31));
+                    player->getSprite()->setTexture(textures["PlayerIdle"]);
+                }
+                if(keyCode == sf::Keyboard::A){
+                    player->getSprite()->setTextureRect(sf::IntRect(0, 0, 23, 31));
+                    player->getSprite()->setTexture(textures["IdleLeft"]);
+                }
+                // if(keyCode == sf::Keyboard){
+                //     player->getSprite()->setTexture(textures["PlayerJump"]); 
+                //  }
+
+            }
             auto rect = player->getSprite()->getTextureRect();
             if((*pressed)["Right"]) //right
             {
@@ -160,12 +254,17 @@ void Game::run()
                 player->getSprite()->setTexture(textures["PlayerRun"]);
             }
 
-            if((*pressed)["Left"])
+            else if((*pressed)["Left"])
             {
                 player->setLeft(true);
-                //player->getSprite()->setTextureRect(sf::IntRect(0, 0, rect.width, rect.height));
+                //player->geif(keyCode == sf::Keyboard::Space && deltaTime < 1.0f){
+                //    player->getSprite()->setTexture(textures["PlayerJump"]); 
+                // }else{
+                //     player->getSprite()->setTextureRect(sf::IntRect(0, 0, 23, 31));
+                //     player->getSprite()->setTexture(textures["PlayerIdle"]);
+                // }tSprite()->setTextureRect(sf::IntRect(0, 0, rect.width, rect.height));
                 player->getSprite()->setTexture(textures["PlayerLeftRun"]);
-            }
+            }else{}
 
             if((*pressed)["Jump"])
             {
@@ -177,6 +276,10 @@ void Game::run()
             if((*pressed)["Attack"])
             {
                 player->setAttack(true);
+                if(player->getMethod() == 1){
+                    player->getSprite()->setTextureRect(sf::IntRect(41, 0, 41, 32));
+                    player->getSprite()->setTexture(textures["Attacks"]);
+                }
             }
 
             if((*pressed)["Switch"])
@@ -243,7 +346,9 @@ void Game::run()
                 playLevel();
                 break;
         } 
+        this->updatePlayer();
     }
+    
 }
 
 void Game::setMainMenu()
@@ -388,8 +493,11 @@ void Game::setLevel(std::string filename)
     window.setView(view);
     //allocates memory for player since there is no default constructor that allows global variable otherwise
     if(player == NULL)
-    {
-        player = new Player(&textures["PlayerIdle"], 6.0f, 14.0f, 1.0f, 24, 31, 0, 0);  //instantiates player. passes player textures, max x-axis speed, max y-axis speed, and acceleration rate
+    {   
+        std::vector<sf::Texture*> playertextures;
+        playertextures.push_back(&textures["PlayerIdle"]);
+        playertextures.push_back(&textures["Shuriken"]);
+        player = new Player(playertextures[0], 6.0f, 14.0f, 1.0f, 24, 31, 0, 0);  //instantiates player. passes player textures, max x-axis speed, max y-axis speed, and acceleration rate
         player->setHealth(5);
     }
 
@@ -429,7 +537,8 @@ void Game::setLevel(std::string filename)
     while(element != NULL)
     {
         bool jump = std::stoi(element->ToElement()->Attribute("width"))==17;
-        Enemy *enemy = new Enemy(&textures["Enemy"],2.0f,8.0f,1.0f,35,35,jump);
+        Enemy *enemy = new Enemy(&textures["Bug"],2.0f,8.0f,1.0f,35,35,jump);
+        
         enemy->getSprite()->setPosition(std::stoi(element->ToElement()->Attribute("x")),std::stoi(element->ToElement()->Attribute("y")));
         entities.push_back(enemy);
         element = element->NextSibling();
@@ -495,6 +604,10 @@ void Game::setLevel(std::string filename)
     }
 }
 
+void Game::initEnemy()
+{
+    this->enemy = new Enemy();
+}
 void Game::playLevel()
 {
     window.clear();
@@ -667,7 +780,7 @@ void Game::playLevel()
     player->getSprite()->move(player->getXVel(),player->getYVel());
     player->setX(player->getX() + player->getXVel());
     player->setY(player->getY() + player->getYVel());
-
+    
     for(int i = 0; i <  entities.size(); i++)
     {
         Entity *entity = entities.at(i);
@@ -678,7 +791,9 @@ void Game::playLevel()
         {
             if(entity->getClass() == "Enemy")
             {
+
                 activeSounds.addSound(&sounds["EnemyHit"]);
+                entity->getSprite()->setTexture(textures["EnemyBugDeath"]);
                 player->decreaseHealth();
                 if(player->getHealth() == 0)
                 {
@@ -928,7 +1043,8 @@ void Game::playLevel()
     window.draw(*player->getSprite());
 
     for(auto shuriken : *shurikens)
-    {
+    {   
+        shuriken->getSprite()->setTexture(textures["Shuriken"]);
        window.draw(*shuriken->getSprite()); 
     }
 
@@ -939,6 +1055,8 @@ void Game::playLevel()
     Hud hud(player, &textures["Heart"]);
     hud.draw(&window);
 
+    /////////////deontae
+    this->renderPlayer();
     window.display();
 }
 
@@ -992,8 +1110,6 @@ std::string Game::mouseCollision()
     sf::RectangleShape r(sf::Vector2f(1,1));
 
     r.setPosition(mousePos);
-
-   std::cout << mousePos.x  << "," << mousePos.y << "\n";
 
     for(int i = 0; i < buttons.size(); i++)
     {
