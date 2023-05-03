@@ -775,7 +775,7 @@ void Game::playLevel()
                 std::string part;
                 sf::Text t;
                 t.setFont(font);
-                t.setCharacterSize(20);
+                t.setCharacterSize(18);
                 t.setFillColor(sf::Color::Blue);
                 t.setPosition(entity->getSprite()->getPosition().x,entity->getSprite()->getPosition().y - str.size());
             
@@ -789,8 +789,8 @@ void Game::playLevel()
 
                 background.setTexture(&textures["Text"]);
 
-                t.setPosition(entity->getX() - 300,entity->getY() + 350);
-                background.setPosition(entity->getX() - 300, entity->getY() + 350);
+                t.setPosition(entity->getX() - 93,entity->getY() + 340);
+                background.setPosition(entity->getX() - 100, entity->getY() + 330);
 
                 window.draw(background);
                 
