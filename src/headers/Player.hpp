@@ -79,10 +79,7 @@ class Player : public Entity
         void createAttack(const sf::View &view);
 
         //other methods
-        void animation();
-
         ////////functions/////////////
-        ////////////////deontae
         bool getAlive();
         void updateMovement();
         void updateAnimations();

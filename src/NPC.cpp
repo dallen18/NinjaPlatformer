@@ -1,6 +1,13 @@
 #include "headers/NPC.hpp"
 #include <iostream>
 
+NPC::NPC()
+{   this->iVariables();   
+    this->iTexture();
+    this->iSprite();
+    this->iAnimations(); 
+}
+
 NPC::NPC(sf::Texture *texture, float xMax, float yMax, float accel, int xSize, int ySize, std::string m)
 {
     setTexture(texture);
@@ -89,6 +96,11 @@ NPC::NPC(sf::Texture *texture, float xMax, float yMax, float accel, int xSize, i
        
     }*/
 }
+NPC::~NPC()
+{
+
+}
+
 std::string NPC::getString()
 {
     return message;
@@ -104,7 +116,67 @@ void NPC::move()
 
 }
 
-void NPC::animation()
-{
-
+//loads merchant texture
+void NPC::iTexture(){
+    if(!this->merchantTexture.loadFromFile("resources/Images/Player/Merchant.png"))
+    {
+        std::cout<<"texture did not load"<<"\n";
+    }
 }
+
+void NPC::iVariables()
+{   
+    this->nAnimationState = MERCH_IDLE;
+}
+
+void NPC::update()
+{
+    this->updateMovement();
+    this->updateAnimations();
+}
+
+void NPC::render(sf::RenderTarget& target){
+    target.draw(this->sprite);
+}
+
+/*
+Sets texture to the sprite and start postion, height and width
+*/
+void NPC::iSprite()
+{
+    this->sprite.setTexture(this->merchantTexture);
+    this->currentFrame = sf::IntRect(0,0,91.1,70);
+    this->sprite.setTextureRect(this->currentFrame);
+    this->sprite.setScale(2.0f, 2.0f);
+}
+
+void NPC::iAnimations(){
+    this->nAnimationTimer.restart();
+}
+
+void NPC::updateMovement(){
+    this->nAnimationState = MERCH_IDLE;
+}
+
+/*
+Method that sets measurements for NPC, moves across the texture with a 91.1f windows, 
+every .17 seconds it iterates through to the next frame
+*/
+void NPC::updateAnimations()
+{
+if(this->nAnimationState == MERCH_IDLE)
+    {
+        if(this->nAnimationTimer.getElapsedTime().asSeconds()>= 0.17f)
+        { 
+            this->currentFrame.top = 0.f;
+            this->currentFrame.left += 91.1f;
+            if(this->currentFrame.left >= 1278.f)
+               this->currentFrame.left = 0;
+
+            this->nAnimationTimer.restart();
+            this->sprite.setTextureRect(this->currentFrame);
+        }
+    }
+}
+
+

@@ -7,7 +7,9 @@
 class Entity
 {
     private:
-        
+
+        sf::Sprite sprite;
+        sf::Texture textureSheet;
         float xVel;
         float yVel;
         float xMax;
@@ -23,10 +25,6 @@ class Entity
 
         
     public:
-        /// moved from private
-        sf::Sprite sprite;
-        sf::Texture textureSheet;
-        //////////
 
         //getter methods
         sf::Sprite *getSprite();
@@ -63,18 +61,11 @@ class Entity
 
         virtual void move();
 
-        //Set states in public, have setters and getters
-        //State will hold the animation features and will update in play level
-        //in my animation update I will 
-
-        //////////////
-
         //methods that need to be implemented for every class that is derived from Entity
         void update();
         void render(sf::RenderTarget& target);
-
         virtual void animation(sf::Texture *t)
         {
-            //animation.getUpdate();
-        }; //handles animation
+            
+        }; 
 };

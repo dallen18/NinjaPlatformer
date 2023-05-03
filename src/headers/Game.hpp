@@ -62,7 +62,7 @@ class Game
         //Deontae's trouble shooting
         Enemy *enemy;
         Player *players;
-        void iPlayer();
+        NPC *NPCs;
 
         InputManager *input;
 
@@ -94,10 +94,17 @@ class Game
         std::string mouseCollision();
         bool checkCollision(sf::Rect<float> a, sf::Rect<float> b);
 
+
         void updateEnemy();
-        void initEnemy();
+        void iEnemy();
         void renderEnemy();
+
         void updatePlayer();
         void renderPlayer();
+        void iPlayer();
+        
+        void updateNPC();
+        void renderNPC();
+        void iNPC();
 
 };

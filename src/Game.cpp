@@ -20,9 +20,9 @@ Game::Game()
     initWindow();
     ///////////////
     this->initWindow();
-    this->initEnemy();
-    this->iPlayer();
-    
+    //this->iEnemy();
+    //this->iPlayer();
+    this->iNPC();
     //////////////////
     loadTextures();
 
@@ -36,27 +36,45 @@ Game::~Game()
     delete player;
     delete this->enemy;
     delete this->players;
+    delete this->NPCs;
 }
 //////////    Deontae
-void Game::updateEnemy(){
-    this->enemy->update();
+// void Game::updateEnemy(){
+//     this->enemy->update();
+// }
+
+// void Game::updatePlayer(){
+//     this->players->update();
+// }
+
+void Game::updateNPC(){
+    this->NPCs->update();
 }
 
-void Game::updatePlayer(){
-    this->players->update();
+// void Game::renderEnemy(){
+//     this->enemy->render(this->window);
+// }
+
+// void Game::renderPlayer(){
+//     this->players->render(this->window);
+// }
+
+void Game::renderNPC(){
+    this->NPCs->render(this->window);
 }
 
-void Game::renderEnemy(){
-    this->enemy->render(this->window);
+// void Game::iPlayer(){
+//     this->players = new Player();
+// }
+
+void Game::iNPC(){
+    this-> NPCs = new NPC();
 }
 
-void Game::renderPlayer(){
-    this->players->render(this->window);
-}
-
-void Game::iPlayer(){
-    this->players = new Player();
-}
+// void Game::iEnemy()
+// {
+//     this->enemy = new Enemy();
+// }
 //////////////////
 
 //initializes window
@@ -218,34 +236,27 @@ void Game::run()
                 std:: cout <<"a";
             }
         }
-        //////////////////
-        float deltaTime;
-        {
-            const auto new_time = std::chrono::steady_clock::now();
-            deltaTime = std::chrono::duration<float>(new_time - time).count();
-            time = new_time;
-        }
+        
         input->checkPlayerInput();
         auto pressed = input->getPressed();
 
         if(player != NULL)
         {
 
-            if(event.type == sf::Event::KeyReleased){   
-                auto keyCode = event.key.code;
-                if(keyCode == sf::Keyboard::D){
-                    player->getSprite()->setTextureRect(sf::IntRect(0, 0, 23, 31));
-                    player->getSprite()->setTexture(textures["PlayerIdle"]);
-                }
-                if(keyCode == sf::Keyboard::A){
-                    player->getSprite()->setTextureRect(sf::IntRect(0, 0, 23, 31));
-                    player->getSprite()->setTexture(textures["IdleLeft"]);
-                }
-                // if(keyCode == sf::Keyboard){
-                //     player->getSprite()->setTexture(textures["PlayerJump"]); 
-                //  }
-
-            }
+            // if(event.type == sf::Event::KeyReleased){   
+            //     auto keyCode = event.key.code;
+            //     if(keyCode == sf::Keyboard::D){
+            //         player->getSprite()->setTextureRect(sf::IntRect(0, 0, 23, 31));
+            //         player->getSprite()->setTexture(textures["PlayerIdle"]);
+            //     }
+            //     if(keyCode == sf::Keyboard::A){
+            //         player->getSprite()->setTextureRect(sf::IntRect(0, 0, 23, 31));
+            //         player->getSprite()->setTexture(textures["IdleLeft"]);
+            //     }
+            //     // if(keyCode == sf::Keyboard){
+            //     //     player->getSprite()->setTexture(textures["PlayerJump"]); 
+            //     //  }
+            // }
             auto rect = player->getSprite()->getTextureRect();
             if((*pressed)["Right"]) //right
             {
@@ -257,12 +268,6 @@ void Game::run()
             else if((*pressed)["Left"])
             {
                 player->setLeft(true);
-                //player->geif(keyCode == sf::Keyboard::Space && deltaTime < 1.0f){
-                //    player->getSprite()->setTexture(textures["PlayerJump"]); 
-                // }else{
-                //     player->getSprite()->setTextureRect(sf::IntRect(0, 0, 23, 31));
-                //     player->getSprite()->setTexture(textures["PlayerIdle"]);
-                // }tSprite()->setTextureRect(sf::IntRect(0, 0, rect.width, rect.height));
                 player->getSprite()->setTexture(textures["PlayerLeftRun"]);
             }else{}
 
@@ -346,7 +351,8 @@ void Game::run()
                 playLevel();
                 break;
         } 
-        this->updatePlayer();
+        this->updateNPC();
+        //this->updatePlayer();
     }
     
 }
@@ -604,10 +610,6 @@ void Game::setLevel(std::string filename)
     }
 }
 
-void Game::initEnemy()
-{
-    this->enemy = new Enemy();
-}
 void Game::playLevel()
 {
     window.clear();
@@ -1056,7 +1058,8 @@ void Game::playLevel()
     hud.draw(&window);
 
     /////////////deontae
-    this->renderPlayer();
+    //this->renderPlayer();
+    this->renderNPC();
     window.display();
 }
 

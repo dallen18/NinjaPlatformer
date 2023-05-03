@@ -225,15 +225,6 @@ void Player::decreaseHealth()
     }
 }
 
-void Player::animation()
-{
-    
-
-}
-
-///Finish later today
-//void Player::idle(bool b){
-//};
 
 /*
 Method is responsible for animating the player sprite. It uses the textures passed in the constructor.
