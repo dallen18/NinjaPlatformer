@@ -43,9 +43,9 @@ void Background::draw(sf::RenderWindow *w)
         positionb=position1*.9-912;
         positionc = position1*.8-864;
     }
-    backgrounda.setPosition(positiona,-300);
-    backgroundb.setPosition(positionb,-300);
-    backgroundc.setPosition(positionc,-300);
+    backgrounda.setPosition(positiona,-270);
+    backgroundb.setPosition(positionb,-270);
+    backgroundc.setPosition(positionc,-270);
      w->draw(backgrounda);
      w->draw(backgroundb);
      w->draw(backgroundc);
