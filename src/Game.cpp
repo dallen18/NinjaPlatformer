@@ -243,20 +243,20 @@ void Game::run()
         if(player != NULL)
         {
 
-            // if(event.type == sf::Event::KeyReleased){   
-            //     auto keyCode = event.key.code;
-            //     if(keyCode == sf::Keyboard::D){
-            //         player->getSprite()->setTextureRect(sf::IntRect(0, 0, 23, 31));
-            //         player->getSprite()->setTexture(textures["PlayerIdle"]);
-            //     }
-            //     if(keyCode == sf::Keyboard::A){
-            //         player->getSprite()->setTextureRect(sf::IntRect(0, 0, 23, 31));
-            //         player->getSprite()->setTexture(textures["IdleLeft"]);
-            //     }
-            //     // if(keyCode == sf::Keyboard){
-            //     //     player->getSprite()->setTexture(textures["PlayerJump"]); 
-            //     //  }
-            // }
+            if(event.type == sf::Event::KeyReleased){   
+                auto keyCode = event.key.code;
+                if(keyCode == sf::Keyboard::D){
+                    player->getSprite()->setTextureRect(sf::IntRect(0, 0, 23, 31));
+                    player->getSprite()->setTexture(textures["PlayerIdle"]);
+                }
+                if(keyCode == sf::Keyboard::A){
+                    player->getSprite()->setTextureRect(sf::IntRect(0, 0, 23, 31));
+                    player->getSprite()->setTexture(textures["IdleLeft"]);
+                }
+                // if(keyCode == sf::Keyboard){
+                //     player->getSprite()->setTexture(textures["PlayerJump"]); 
+                //  }
+            }
             auto rect = player->getSprite()->getTextureRect();
             if((*pressed)["Right"]) //right
             {
